@@ -61,7 +61,7 @@ function encodeWav(chunks: Float32Array[], sampleRate: number): Blob {
     const start = Math.floor(i * ratio);
     const end = Math.min(flat.length, Math.floor((i + 1) * ratio));
     let sum = 0;
-    for (let j = start; j < end; j++) sum += flat[j];
+    for (let j = start; j < end; j++) sum += flat[j] ?? 0;
     out[i] = sum / (end - start);
   }
   const buf = new ArrayBuffer(44 + out.length * 2);
@@ -84,7 +84,7 @@ function encodeWav(chunks: Float32Array[], sampleRate: number): Blob {
   view.setUint32(40, out.length * 2, true);
   let p = 44;
   for (let i = 0; i < out.length; i++) {
-    const s = Math.max(-1, Math.min(1, out[i]));
+    const s = Math.max(-1, Math.min(1, out[i] ?? 0));
     view.setInt16(p, s < 0 ? s * 0x8000 : s * 0x7fff, true);
     p += 2;
   }
