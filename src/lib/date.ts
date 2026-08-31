@@ -51,7 +51,7 @@ export function parseLooseDate(input: string): string | null {
 
   // "9月15号" / "9月15日" / "9-15" / "9/15"
   const m = s.match(/(\d{1,2})\s*[月\/\-]\s*(\d{1,2})\s*[日号]?/);
-  if (m) {
+  if (m && m[1] && m[2]) {
     const year =
       Number(m[1]) < now.getMonth() + 1 ? now.getFullYear() + 1 : now.getFullYear();
     return normalize(String(year), m[1], m[2]);
