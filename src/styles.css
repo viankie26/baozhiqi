@@ -106,6 +106,10 @@
 }
 
 .dark {
+  --warm-bg: oklch(0.18 0.012 75);
+  --expired: oklch(0.704 0.191 22.216);
+  --soon: oklch(0.78 0.16 75);
+  --safe: oklch(0.7 0.15 150);
   --background: oklch(0.129 0.042 264.695);
   --foreground: oklch(0.984 0.003 247.858);
   --card: oklch(0.208 0.042 265.755);
