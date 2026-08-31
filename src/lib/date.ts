@@ -47,7 +47,7 @@ export function parseLooseDate(input: string): string | null {
 
   // Already ISO
   const iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (iso) return normalize(iso[1], iso[2], iso[3]);
+  if (iso && iso[1] && iso[2] && iso[3]) return normalize(iso[1], iso[2], iso[3]);
 
   // "9月15号" / "9月15日" / "9-15" / "9/15"
   const m = s.match(/(\d{1,2})\s*[月\/\-]\s*(\d{1,2})\s*[日号]?/);
