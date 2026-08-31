@@ -67,6 +67,10 @@
 
 :root {
   --radius: 0.625rem;
+  --warm-bg: oklch(0.985 0.008 75);
+  --expired: oklch(0.577 0.245 27.325);
+  --soon: oklch(0.76 0.16 75);
+  --safe: oklch(0.62 0.14 150);
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
