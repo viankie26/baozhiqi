@@ -7,7 +7,7 @@ const CHAT_MODEL = "google/gemini-3.7-flash";
 
 interface Parsed {
   name?: string | undefined;
-  expiryDate?: string | undefined;
+  expiryDate?: string | null | undefined;
   category?: string | undefined;
   note?: string | undefined;
 }
