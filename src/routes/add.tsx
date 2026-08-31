@@ -83,7 +83,12 @@ function AddPage() {
       toast.error("请选择过期日期");
       return;
     }
-    addItem({ name: name.trim(), category, expiryDate, note: note.trim() || undefined });
+    addItem({
+      name: name.trim(),
+      category,
+      expiryDate,
+      ...(note.trim() ? { note: note.trim() } : {}),
+    });
     toast.success("已添加");
     navigate({ to: "/" });
   }

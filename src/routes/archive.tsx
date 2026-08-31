@@ -10,7 +10,7 @@ export const Route = createFileRoute("/archive")({
   component: ArchivePage,
 });
 
-import { useItems, useItemActions } from "@/lib/useItems";
+import { useItems, updateItem, deleteItem } from "@/lib/useItems";
 import { ItemCard } from "@/components/ItemCard";
 import { Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
