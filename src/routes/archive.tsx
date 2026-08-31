@@ -17,7 +17,7 @@ import { toast } from "sonner";
 
 function ArchivePage() {
   const items = useItems();
-  const { deleteItem, updateItem } = useItemActions();
+  const { deleteItem, updateItem } = { deleteItem, updateItem };
   const archived = items.filter((it) => it.usedUp);
 
   return (
