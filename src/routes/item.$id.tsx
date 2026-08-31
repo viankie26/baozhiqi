@@ -36,13 +36,19 @@ function ItemDetailPage() {
   }
 
   function handleSave() {
-    if (!name.trim()) return toast.error("请填写名称");
-    if (!expiryDate) return toast.error("请选择日期");
+    if (!name.trim()) {
+      toast.error("请填写名称");
+      return;
+    }
+    if (!expiryDate) {
+      toast.error("请选择日期");
+      return;
+    }
     updateItem(id, {
       name: name.trim(),
       category,
       expiryDate,
-      note: note.trim() || undefined,
+      ...(note.trim() ? { note: note.trim() } : {}),
     });
     toast.success("已更新");
     navigate({ to: "/" });
