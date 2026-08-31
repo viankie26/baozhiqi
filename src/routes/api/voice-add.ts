@@ -6,10 +6,10 @@ const STT_MODEL = "openai/gpt-4o-mini-transcribe";
 const CHAT_MODEL = "google/gemini-3.7-flash";
 
 interface Parsed {
-  name?: string;
-  expiryDate?: string;
-  category?: string;
-  note?: string;
+  name?: string | undefined;
+  expiryDate?: string | undefined;
+  category?: string | undefined;
+  note?: string | undefined;
 }
 
 export const Route = createFileRoute("/api/voice-add")({

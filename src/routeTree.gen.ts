@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiVoiceAddRouteImport } from './routes/api/voice-add'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVoiceAddRoute = ApiVoiceAddRouteImport.update({
+  id: '/api/voice-add',
+  path: '/api/voice-add',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/voice-add': typeof ApiVoiceAddRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/voice-add': typeof ApiVoiceAddRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/voice-add': typeof ApiVoiceAddRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/voice-add'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/voice-add'
+  id: '__root__' | '/' | '/api/voice-add'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiVoiceAddRoute: typeof ApiVoiceAddRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/voice-add': {
+      id: '/api/voice-add'
+      path: '/api/voice-add'
+      fullPath: '/api/voice-add'
+      preLoaderRoute: typeof ApiVoiceAddRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiVoiceAddRoute: ApiVoiceAddRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
