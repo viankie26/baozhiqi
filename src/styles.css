@@ -60,14 +60,25 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-expired: var(--expired);
+  --color-expired-soft: var(--expired-soft);
   --color-soon: var(--soon);
+  --color-soon-soft: var(--soon-soft);
   --color-safe: var(--safe);
+  --color-safe-soft: var(--safe-soft);
   --color-warm-bg: var(--warm-bg);
+  --color-surface: var(--surface);
+  --font-sans: "Noto Sans SC", ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
+  --shadow-card: 0 1px 2px oklch(0.3 0.03 80 / 0.05), 0 6px 20px -12px oklch(0.3 0.03 80 / 0.25);
+  --shadow-float: 0 8px 30px -8px oklch(0.35 0.06 160 / 0.35);
 }
 
 :root {
-  --radius: 0.625rem;
-  --warm-bg: oklch(0.985 0.008 75);
+  --radius: 0.875rem;
+  --warm-bg: oklch(0.982 0.009 85);
+  --surface: oklch(1 0 0);
+  --expired-soft: oklch(0.955 0.03 25);
+  --soon-soft: oklch(0.965 0.045 85);
+  --safe-soft: oklch(0.96 0.035 160);
   --expired: oklch(0.577 0.245 27.325);
   --soon: oklch(0.76 0.16 75);
   --safe: oklch(0.62 0.14 150);
