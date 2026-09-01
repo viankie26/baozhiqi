@@ -1,15 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { parseLooseDate } from "@/lib/date";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const STT_MODEL = "openai/gpt-4o-mini-transcribe";
 const CHAT_MODEL = "google/gemini-3.7-flash";
 
 interface Parsed {
-  name?: string | undefined;
+  name?: string | null | undefined;
   expiryDate?: string | null | undefined;
-  category?: string | undefined;
-  note?: string | undefined;
+  category?: string | null | undefined;
+  note?: string | null | undefined;
 }
 
 export const Route = createFileRoute("/api/voice-add")({
@@ -55,21 +56,24 @@ export const Route = createFileRoute("/api/voice-add")({
 
         // 2. Parse transcript into structured fields via chat completion
         const parsed = await parseTranscript(apiKey, transcript);
-        if (!parsed) {
-          return Response.json(
-            { transcript, name: "", expiryDate: null, category: "other" },
-            { status: 200 },
-          );
-        }
-        return Response.json({ transcript, ...parsed });
+        const fallbackDate = parseLooseDate(transcript);
+        return Response.json({
+          transcript,
+          name: parsed?.name ?? "",
+          expiryDate: parsed?.expiryDate ?? fallbackDate,
+          category: parsed?.category ?? "other",
+          ...(parsed?.note ? { note: parsed.note } : {}),
+        });
       },
     },
   },
 });
 
 async function parseTranscript(apiKey: string, transcript: string): Promise<Parsed | null> {
+  const today = new Date().toISOString().slice(0, 10);
   const system =
-    "你是一个保质期记录助手。用户用中文口语描述一件物品及其过期时间。请把转写文本解析为结构化 JSON。" +
+    `你是一个保质期记录助手。今天是 ${today}（请以此推断相对日期）。` +
+    "转写文本可能是繁体或中文数字（如“九月十五號”），请转换为简体与阿拉伯数字。用户用中文口语描述一件物品及其过期时间。请把转写文本解析为结构化 JSON。" +
     "字段：name(物品名，简洁，不带\"过期\"等修饰)，expiryDate(YYYY-MM-DD，根据\"X月X号/日\"、\"明天/后天/今天\"等推断，跨年则用下一个该月份的年份)，" +
     "category(只能是 food/medicine/daily/other 之一，食品=food 药品=medicine 日化清洁护肤=daily 其他=other)，note(可选备注)。" +
     "只输出 JSON，不要解释，不要 markdown 代码块。";
@@ -100,10 +104,10 @@ async function parseTranscript(apiKey: string, transcript: string): Promise<Pars
     const json = extractJson(content);
     const parsed = z
       .object({
-        name: z.string().optional(),
-        expiryDate: z.string().nullable().optional(),
-        category: z.string().optional(),
-        note: z.string().optional(),
+        name: z.string().nullish(),
+        expiryDate: z.string().nullish(),
+        category: z.string().nullish(),
+        note: z.string().nullish(),
       })
       .parse(json);
     return parsed;
