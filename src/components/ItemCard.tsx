@@ -1,55 +1,86 @@
 import { Link } from "@tanstack/react-router";
-import { CATEGORY_EMOJI, type Item } from "@/lib/types";
-import { daysUntil, formatDate, remainingLabel, urgencyOf, type Urgency } from "@/lib/date";
+import { CATEGORY_EMOJI, CATEGORY_LABEL, type Item } from "@/lib/types";
+import {
+  daysUntil,
+  formatDate,
+  progressOf,
+  urgencyOf,
+  type Urgency,
+} from "@/lib/date";
 
-const urgencyColor: Record<Urgency, string> = {
-  expired: "var(--color-expired)",
-  soon: "var(--color-soon)",
-  normal: "var(--color-safe)",
+const rail: Record<Urgency, string> = {
+  expired: "bg-expired",
+  soon: "bg-soon",
+  normal: "bg-safe",
 };
 
-const urgencyBar: Record<Urgency, string> = {
-  expired: "bg-[var(--color-expired)]",
-  soon: "bg-[var(--color-soon)]",
-  normal: "bg-[var(--color-safe)]",
+const tone: Record<Urgency, string> = {
+  expired: "text-expired",
+  soon: "text-soon",
+  normal: "text-safe",
 };
 
-export function ItemCard({ item }: { item: Item }) {
+const chip: Record<Urgency, string> = {
+  expired: "bg-expired-soft text-expired",
+  soon: "bg-soon-soft text-soon",
+  normal: "bg-safe-soft text-safe",
+};
+
+const statusLabel: Record<Urgency, string> = {
+  expired: "已过期",
+  soon: "临期",
+  normal: "正常",
+};
+
+export function ItemCard({ item, muted }: { item: Item; muted?: boolean }) {
   const urgency = urgencyOf(item);
   const days = daysUntil(item.expiryDate);
+  const progress = progressOf(item);
 
   return (
     <Link
       to="/item/$id"
       params={{ id: item.id }}
-      className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-border bg-card p-3 pr-4 shadow-sm transition active:scale-[0.99]"
+      className={`card-elevated relative flex items-stretch gap-3 overflow-hidden rounded-2xl p-3 pl-4 transition duration-200 active:scale-[0.985] ${
+        muted ? "opacity-70" : ""
+      }`}
     >
-      <span className={`absolute inset-y-0 left-0 w-1.5 ${urgencyBar[urgency]}`} />
-      <div className="ml-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted text-xl">
+      <span className={`absolute inset-y-0 left-0 w-1 ${rail[urgency]}`} />
+
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center self-center rounded-2xl bg-muted text-[1.375rem]">
         {CATEGORY_EMOJI[item.category]}
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium text-foreground">{item.name}</p>
-        <p className="text-xs text-muted-foreground">{formatDate(item.expiryDate)}</p>
-        {item.note ? (
-          <p className="truncate text-xs text-muted-foreground/80">{item.note}</p>
-        ) : null}
+
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+        <div className="flex items-center gap-2">
+          <p className="truncate text-[0.9375rem] font-semibold text-foreground">
+            {item.name}
+          </p>
+          <span
+            className={`shrink-0 rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium ${chip[urgency]}`}
+          >
+            {statusLabel[urgency]}
+          </span>
+        </div>
+        <p className="truncate text-xs text-muted-foreground">
+          {CATEGORY_LABEL[item.category]} · {formatDate(item.expiryDate)}
+          {item.note ? ` · ${item.note}` : ""}
+        </p>
+        <div className="mt-0.5 h-1 w-full max-w-[9rem] overflow-hidden rounded-full bg-muted">
+          <div
+            className={`h-full rounded-full ${rail[urgency]} transition-[width] duration-500`}
+            style={{ width: `${Math.round(progress * 100)}%` }}
+          />
+        </div>
       </div>
-      <div className="shrink-0 text-right">
-        <span
-          className="text-sm font-semibold"
-          style={{ color: urgencyColor[urgency] }}
-        >
-          {remainingLabel(item)}
+
+      <div className="flex shrink-0 flex-col items-end justify-center pl-1">
+        <span className={`text-xl font-bold leading-none tabular-nums ${tone[urgency]}`}>
+          {Math.abs(days)}
         </span>
-        {days >= 0 && days <= 30 && (
-          <div className="mt-1 h-1 w-16 overflow-hidden rounded-full bg-muted">
-            <div
-              className={`h-full ${urgencyBar[urgency]}`}
-              style={{ width: `${Math.min(100, 100 - days * (100 / 30))}%` }}
-            />
-          </div>
-        )}
+        <span className="mt-1 text-[0.6875rem] text-muted-foreground">
+          {days < 0 ? "天前过期" : days === 0 ? "今天到期" : "天后到期"}
+        </span>
       </div>
     </Link>
   );
