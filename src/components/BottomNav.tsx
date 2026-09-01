@@ -17,8 +17,7 @@ export function BottomNav() {
           <Link
             to="/add"
             aria-label="添加物品"
-            className="-mt-8 flex h-15 w-15 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-float)] ring-4 ring-warm-bg transition active:scale-95"
-            style={{ height: "3.5rem", width: "3.5rem" }}
+            className="-mt-8 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-float)] ring-4 ring-warm-bg transition active:scale-95"
           >
             <Plus className="h-7 w-7" strokeWidth={2.4} />
           </Link>
