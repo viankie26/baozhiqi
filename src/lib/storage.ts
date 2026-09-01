@@ -13,22 +13,32 @@ function isBrowser() {
   return typeof window !== "undefined" && typeof localStorage !== "undefined";
 }
 
-export function getItems(): Item[] {
-  if (!isBrowser()) return [];
+const EMPTY: Item[] = [];
+let cache: Item[] | null = null;
+
+function read(): Item[] {
+  if (!isBrowser()) return EMPTY;
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return [];
+    if (!raw) return EMPTY;
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) return EMPTY;
     return parsed as Item[];
   } catch {
-    return [];
+    return EMPTY;
   }
+}
+
+/** Returns a stable (cached) reference so useSyncExternalStore can compare snapshots. */
+export function getItems(): Item[] {
+  if (cache === null) cache = read();
+  return cache;
 }
 
 export function saveItems(items: Item[]) {
   if (!isBrowser()) return;
   localStorage.setItem(KEY, JSON.stringify(items));
+  cache = items;
   emit();
 }
 
