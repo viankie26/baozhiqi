@@ -4,10 +4,21 @@ import { toast } from "sonner";
 import { Save, Trash2, CheckCircle2 } from "lucide-react";
 import { CATEGORIES, type Category } from "@/lib/types";
 import { deleteItem, updateItem, useItemById } from "@/lib/useItems";
+import { PageHeader } from "@/components/PageHeader";
 
 export const Route = createFileRoute("/item/$id")({
   head: () => ({
-    meta: [{ title: "物品详情 · 保质期记录" }],
+    meta: [
+      { title: "物品详情 · 保质期记录" },
+      { name: "description", content: "查看和编辑物品的保质期、分类与备注。" },
+      { property: "og:title", content: "物品详情 · 保质期记录" },
+      {
+        property: "og:description",
+        content: "查看和编辑物品的保质期、分类与备注。",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
   }),
   component: ItemDetailPage,
 });
@@ -68,11 +79,9 @@ function ItemDetailPage() {
 
   return (
     <div className="min-h-screen bg-warm-bg pb-32">
-      <header className="px-4 pb-2 pt-12">
-        <h1 className="text-2xl font-bold text-foreground">物品详情</h1>
-      </header>
+      <PageHeader title="物品详情" subtitle={item.name} back />
 
-      <div className="flex flex-col gap-4 px-4 pt-2">
+      <div className="mx-auto flex max-w-md flex-col gap-4 px-4 pt-4">
         <Field label="物品名称">
           <input
             className="w-full rounded-xl border border-input bg-card px-3 py-3 text-foreground outline-none focus:border-primary"

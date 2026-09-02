@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Mic, Loader2, Save } from "lucide-react";
 import { CATEGORIES, type Category } from "@/lib/types";
+import { PageHeader } from "@/components/PageHeader";
 import { addItem } from "@/lib/storage";
 import { startRecording, stopRecording } from "@/lib/voice";
 
@@ -95,17 +96,16 @@ function AddPage() {
 
   return (
     <div className="min-h-screen bg-warm-bg pb-32">
-      <header className="px-4 pb-2 pt-12">
-        <h1 className="text-2xl font-bold text-foreground">添加物品</h1>
-        <p className="text-sm text-muted-foreground">长按麦克风说话，或手动填写</p>
-      </header>
+      <PageHeader title="添加物品" subtitle="点击麦克风说话，或手动填写" back />
 
       {/* Voice button */}
-      <div className="px-4 py-4">
+      <div className="mx-auto max-w-md px-4 pt-4">
         <button
           onClick={handleVoice}
           disabled={processing}
-          className="flex w-full items-center justify-center gap-3 rounded-2xl border border-border bg-card px-4 py-5 shadow-sm transition active:scale-[0.99] disabled:opacity-60"
+          className={`card-elevated flex w-full items-center justify-center gap-3 rounded-2xl px-4 py-5 transition active:scale-[0.99] disabled:opacity-60 ${
+            recording ? "animate-pulse-ring" : ""
+          }`}
         >
           {processing ? (
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -118,7 +118,7 @@ function AddPage() {
             {processing
               ? "识别中…"
               : recording
-                ? "正在录音，再次点击结束"
+                ? "正在录音，点击结束"
                 : "点击说话添加"}
           </span>
         </button>
@@ -130,7 +130,7 @@ function AddPage() {
       </div>
 
       {/* Form */}
-      <div className="flex flex-col gap-4 px-4">
+      <div className="mx-auto flex max-w-md flex-col gap-4 px-4 pt-2">
         <Field label="物品名称">
           <input
             className="w-full rounded-xl border border-input bg-card px-3 py-3 text-foreground outline-none focus:border-primary"
