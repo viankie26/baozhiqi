@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Mic, Loader2, Save } from "lucide-react";
+import { Mic, Loader2 } from "lucide-react";
 import { CATEGORIES, type Category } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { addItem } from "@/lib/storage";
@@ -12,6 +12,10 @@ export const Route = createFileRoute("/add")({
     meta: [
       { title: "添加物品 · 保质期记录" },
       { name: "description", content: "语音或手动添加物品保质期。" },
+      { property: "og:title", content: "添加物品 · 保质期记录" },
+      { property: "og:description", content: "语音或手动添加物品保质期。" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AddPage,
@@ -25,6 +29,9 @@ interface VoiceResult {
   note?: string;
   error?: string;
 }
+
+const inputClass =
+  "w-full border-b-2 border-foreground bg-transparent px-0 py-2.5 text-[1.0625rem] text-foreground outline-none placeholder:text-muted-foreground focus:border-expired";
 
 function AddPage() {
   const navigate = useNavigate();
@@ -96,96 +103,103 @@ function AddPage() {
 
   return (
     <div className="min-h-screen bg-warm-bg pb-32">
-      <PageHeader title="添加物品" subtitle="点击麦克风说话，或手动填写" back />
+      <PageHeader title="添加物品" kicker="NEW ENTRY" back />
 
-      {/* Voice button */}
-      <div className="mx-auto max-w-md px-4 pt-4">
+      <main className="mx-auto max-w-md px-5">
+        {/* Voice */}
         <button
           onClick={handleVoice}
           disabled={processing}
-          className={`card-elevated flex w-full items-center justify-center gap-3 rounded-2xl px-4 py-5 transition active:scale-[0.99] disabled:opacity-60 ${
-            recording ? "animate-pulse-ring" : ""
+          className={`flex w-full items-center gap-4 border-b-2 border-foreground py-6 text-left transition disabled:opacity-60 ${
+            recording ? "animate-pulse-ring bg-expired-soft" : ""
           }`}
         >
-          {processing ? (
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          ) : (
-            <Mic
-              className={`h-6 w-6 ${recording ? "text-destructive" : "text-primary"}`}
-            />
-          )}
-          <span className="font-medium text-foreground">
-            {processing
-              ? "识别中…"
-              : recording
-                ? "正在录音，点击结束"
-                : "点击说话添加"}
+          <span
+            className={`flex h-12 w-12 shrink-0 items-center justify-center ${
+              recording ? "bg-expired text-primary-foreground" : "bg-foreground text-background"
+            }`}
+          >
+            {processing ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Mic className="h-5 w-5" />
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="font-display block text-[1.25rem] leading-none text-foreground">
+              {processing ? "识别中" : recording ? "正在录音" : "语音记录"}
+            </span>
+            <span className="label-kicker mt-2 block text-muted-foreground">
+              {processing
+                ? "PROCESSING"
+                : recording
+                  ? "TAP TO STOP"
+                  : "TAP & SAY «牛奶 九月十五号过期»"}
+            </span>
           </span>
         </button>
+
         {transcript ? (
-          <p className="mt-2 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+          <p className="border-b border-border py-3 text-[0.8125rem] italic text-muted-foreground">
             “{transcript}”
           </p>
         ) : null}
-      </div>
 
-      {/* Form */}
-      <div className="mx-auto flex max-w-md flex-col gap-4 px-4 pt-2">
-        <Field label="物品名称">
-          <input
-            className="w-full rounded-xl border border-input bg-card px-3 py-3 text-foreground outline-none focus:border-primary"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="如：牛奶"
-          />
-        </Field>
+        <div className="flex flex-col gap-6 pt-7">
+          <Field label="物品名称 / NAME">
+            <input
+              className={inputClass}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="如：牛奶"
+            />
+          </Field>
 
-        <Field label="分类">
-          <div className="grid grid-cols-4 gap-2">
-            {CATEGORIES.map((c) => (
-              <button
-                key={c.value}
-                onClick={() => setCategory(c.value)}
-                className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-xs ${
-                  category === c.value
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-card text-muted-foreground"
-                }`}
-              >
-                <span className="text-lg">{c.emoji}</span>
-                {c.label}
-              </button>
-            ))}
-          </div>
-        </Field>
+          <Field label="分类 / CATEGORY">
+            <div className="grid grid-cols-4 border border-border">
+              {CATEGORIES.map((c, i) => (
+                <button
+                  key={c.value}
+                  onClick={() => setCategory(c.value)}
+                  className={`label-kicker py-3.5 transition ${i > 0 ? "border-l border-border" : ""} ${
+                    category === c.value
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </Field>
 
-        <Field label="过期日期">
-          <input
-            type="date"
-            className="w-full rounded-xl border border-input bg-card px-3 py-3 text-foreground outline-none focus:border-primary"
-            value={expiryDate}
-            onChange={(e) => setExpiryDate(e.target.value)}
-          />
-        </Field>
+          <Field label="过期日期 / EXPIRY">
+            <input
+              type="date"
+              className={inputClass}
+              value={expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
+            />
+          </Field>
 
-        <Field label="备注（可选）">
-          <input
-            className="w-full rounded-xl border border-input bg-card px-3 py-3 text-foreground outline-none focus:border-primary"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="数量、存放位置等"
-          />
-        </Field>
-      </div>
+          <Field label="备注 / NOTE">
+            <input
+              className={inputClass}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="数量、存放位置等"
+            />
+          </Field>
+        </div>
+      </main>
 
-      {/* Save */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-foreground bg-warm-bg px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4">
         <div className="mx-auto max-w-md">
           <button
             onClick={handleSave}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 font-semibold text-primary-foreground shadow-lg active:scale-[0.99]"
+            className="label-kicker w-full bg-foreground py-4 text-background transition active:opacity-80"
           >
-            <Save className="h-5 w-5" /> 保存
+            保存入库 / SAVE
           </button>
         </div>
       </div>
@@ -195,8 +209,8 @@ function AddPage() {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-foreground">{label}</label>
+    <div className="flex flex-col gap-2">
+      <label className="label-kicker text-muted-foreground">{label}</label>
       {children}
     </div>
   );
