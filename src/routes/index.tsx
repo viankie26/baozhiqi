@@ -6,7 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { urgencyOf } from "@/lib/date";
 import type { Item } from "@/lib/types";
-import { AlertTriangle, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -45,63 +45,76 @@ function Index() {
   const showSoon = filter === "all" || filter === "soon";
   const showNormal = filter === "all";
 
+  const today = new Date();
+  const dateline = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, "0")}.${String(
+    today.getDate(),
+  ).padStart(2, "0")}`;
+
   return (
     <div className="min-h-screen bg-warm-bg pb-32">
-      <PageHeader
-        title="保质期记录"
-        subtitle={active.length > 0 ? `在库 ${active.length} 件物品` : "还没有记录"}
-      />
+      <PageHeader title="保质期记录" kicker={`EXPIRY LEDGER · ${dateline}`} />
 
-      <main className="mx-auto max-w-md px-4">
-        <section className="animate-rise mt-4 grid grid-cols-3 gap-2">
-          <Stat label="在库" value={active.length} tone="text-foreground" />
-          <Stat label="临期" value={soon.length} tone="text-soon" />
-          <Stat label="已过期" value={expired.length} tone="text-expired" />
+      <main className="mx-auto max-w-md px-5">
+        {/* Numbers strip */}
+        <section className="animate-rise grid grid-cols-3 border-b-2 border-foreground">
+          <Stat label="在库 STOCK" value={active.length} tone="text-foreground" />
+          <Stat
+            label="临期 SOON"
+            value={soon.length}
+            tone="text-soon"
+            divider
+          />
+          <Stat
+            label="过期 OVER"
+            value={expired.length}
+            tone="text-expired"
+            divider
+          />
         </section>
 
         {alertCount > 0 && (
-          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-expired-soft px-4 py-3 text-expired">
-            <AlertTriangle className="h-[1.15rem] w-[1.15rem] shrink-0" />
-            <span className="text-[0.8125rem] font-medium">
-              {alertCount} 件物品{expired.length > 0 ? "已过期或临期" : "即将过期"}，请尽快处理
-            </span>
-          </div>
+          <p className="label-kicker bg-foreground px-3 py-2.5 text-background">
+            ⚠ {alertCount} 件需要处理
+          </p>
         )}
 
-        <div className="mt-4 flex gap-2">
-          <Chip active={filter === "all"} onClick={() => setFilter("all")}>
+        {/* Filter tabs */}
+        <div className="flex gap-5 border-b border-border py-3">
+          <Tab active={filter === "all"} onClick={() => setFilter("all")}>
             全部
-          </Chip>
-          <Chip active={filter === "soon"} onClick={() => setFilter("soon")}>
+          </Tab>
+          <Tab active={filter === "soon"} onClick={() => setFilter("soon")}>
             临期 {soon.length}
-          </Chip>
-          <Chip active={filter === "expired"} onClick={() => setFilter("expired")}>
-            已过期 {expired.length}
-          </Chip>
+          </Tab>
+          <Tab active={filter === "expired"} onClick={() => setFilter("expired")}>
+            过期 {expired.length}
+          </Tab>
         </div>
 
         {active.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="mt-2 flex flex-col gap-2">
+          <div className="flex flex-col">
             {showExpired && expired.length > 0 && (
-              <Section title="已过期">
+              <Section title="已过期 / OVERDUE">
                 {expired.map((it) => (
                   <ExpiringRow key={it.id} item={it} />
                 ))}
               </Section>
             )}
             {showSoon && soon.length > 0 && (
-              <Section title="即将过期">
+              <Section title="即将过期 / DUE SOON">
                 {soon.map((it) => (
                   <ExpiringRow key={it.id} item={it} />
                 ))}
               </Section>
             )}
             {showNormal && normal.length > 0 && (
-              <Section title="正常">
+              <Section title="正常 / IN DATE">
                 {normal.map((it) => (
-                  <ItemCard key={it.id} item={it} />
+                  <div key={it.id} className="hair-b">
+                    <ItemCard item={it} />
+                  </div>
                 ))}
               </Section>
             )}
@@ -122,20 +135,24 @@ function Stat({
   label,
   value,
   tone,
+  divider,
 }: {
   label: string;
   value: number;
   tone: string;
+  divider?: boolean;
 }) {
   return (
-    <div className="card-elevated rounded-2xl px-3 py-3 text-center">
-      <p className={`text-xl font-bold tabular-nums ${tone}`}>{value}</p>
-      <p className="mt-0.5 text-[0.6875rem] text-muted-foreground">{label}</p>
+    <div className={`py-4 ${divider ? "border-l border-border pl-3" : "pr-3"}`}>
+      <p className={`font-display text-[2rem] leading-none tabular-nums ${tone}`}>
+        {value}
+      </p>
+      <p className="label-kicker mt-2 text-muted-foreground">{label}</p>
     </div>
   );
 }
 
-function Chip({
+function Tab({
   active,
   onClick,
   children,
@@ -147,10 +164,10 @@ function Chip({
   return (
     <button
       onClick={onClick}
-      className={`rounded-full px-3.5 py-1.5 text-[0.8125rem] font-medium transition active:scale-95 ${
+      className={`label-kicker pb-1 transition ${
         active
-          ? "bg-primary text-primary-foreground"
-          : "card-elevated text-muted-foreground"
+          ? "border-b-2 border-foreground text-foreground"
+          : "border-b-2 border-transparent text-muted-foreground"
       }`}
     >
       {children}
@@ -160,12 +177,12 @@ function Chip({
 
 function ExpiringRow({ item }: { item: Item }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="min-w-0 flex-1">
+    <div className="hair-b grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+      <div className="min-w-0">
         <ItemCard item={item} />
       </div>
       <button
-        className="card-elevated flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-destructive transition active:scale-95"
+        className="flex h-11 w-11 shrink-0 items-center justify-center border border-border text-muted-foreground transition active:bg-muted"
         aria-label="删除"
         onClick={() => {
           deleteItem(item.id);
@@ -180,8 +197,8 @@ function ExpiringRow({ item }: { item: Item }) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-2 pt-2">
-      <h2 className="px-1 text-[0.6875rem] font-semibold uppercase tracking-widest text-muted-foreground">
+    <div className="flex flex-col">
+      <h2 className="label-kicker sticky top-[7.5rem] z-10 bg-warm-bg py-3 text-muted-foreground">
         {title}
       </h2>
       {children}
@@ -190,20 +207,17 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function NoMatch({ text }: { text: string }) {
-  return (
-    <p className="py-14 text-center text-sm text-muted-foreground">{text}</p>
-  );
+  return <p className="py-16 text-center text-sm text-muted-foreground">{text}</p>;
 }
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center gap-3 px-6 py-20 text-center">
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted text-4xl">
-        📅
-      </div>
-      <p className="text-muted-foreground">还没有记录任何物品</p>
-      <p className="text-sm text-muted-foreground/70">
-        点击下方的 ＋ 按钮，语音或手动添加
+    <div className="py-20">
+      <p className="font-display text-[2rem] leading-tight text-foreground">
+        空 空 如 也
+      </p>
+      <p className="mt-3 max-w-[18rem] text-sm text-muted-foreground">
+        点击底部的加号，用一句话记录第一件物品的保质期。
       </p>
     </div>
   );

@@ -31,43 +31,43 @@ function ArchivePage() {
     <div className="min-h-screen bg-warm-bg pb-32">
       <PageHeader
         title="归档"
+        kicker="ARCHIVE"
         subtitle={archived.length > 0 ? `${archived.length} 件已用完` : "已用完的物品"}
       />
 
-      <main className="mx-auto max-w-md px-4 pt-4">
+      <main className="mx-auto max-w-md px-5">
         {archived.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-20 text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted text-4xl">
-              🗂️
-            </div>
-            <p className="text-muted-foreground">还没有归档的物品</p>
-            <p className="text-sm text-muted-foreground/70">
-              在详情页点击「用完」即可归档
+          <div className="py-20">
+            <p className="font-display text-[2rem] leading-tight text-foreground">
+              暂 无 归 档
+            </p>
+            <p className="mt-3 max-w-[18rem] text-sm text-muted-foreground">
+              在物品详情页点击「用完」，它就会被收进这里。
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col">
             {archived.map((it) => (
-              <div key={it.id} className="animate-rise flex flex-col gap-2">
+              <div key={it.id} className="animate-rise hair-b pb-3">
                 <ItemCard item={it} muted />
                 <div className="flex gap-2">
                   <button
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-[0.8125rem] font-semibold text-primary-foreground transition active:scale-[0.98]"
+                    className="label-kicker flex flex-1 items-center justify-center gap-1.5 border-2 border-foreground bg-foreground py-3 text-background transition active:opacity-80"
                     onClick={() => {
                       updateItem(it.id, { usedUp: false });
                       toast.success("已回退到在库");
                     }}
                   >
-                    <RotateCcw className="h-4 w-4" /> 回退
+                    <RotateCcw className="h-3.5 w-3.5" /> 回退 UNDO
                   </button>
                   <button
-                    className="card-elevated flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-[0.8125rem] font-medium text-destructive transition active:scale-[0.98]"
+                    className="label-kicker flex items-center justify-center gap-1.5 border-2 border-foreground px-4 py-3 text-foreground transition active:bg-muted"
                     onClick={() => {
                       deleteItem(it.id);
                       toast.success("已删除");
                     }}
                   >
-                    <Trash2 className="h-4 w-4" /> 删除
+                    <Trash2 className="h-3.5 w-3.5" /> 删除
                   </button>
                 </div>
               </div>
