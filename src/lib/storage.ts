@@ -30,16 +30,18 @@ type Row = {
 };
 
 function fromRow(r: Row): Item {
-  return {
+  const item: Item = {
     id: r.id,
     name: r.name,
     category: r.category as Category,
     expiryDate: r.expiry_date,
     createdAt: new Date(r.created_at).getTime(),
-    note: r.note ?? undefined,
     usedUp: r.used_up,
   };
+  if (r.note) item.note = r.note;
+  return item;
 }
+
 
 function sortItems(items: Item[]): Item[] {
   return [...items].sort((a, b) => b.createdAt - a.createdAt);
