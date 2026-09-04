@@ -162,12 +162,19 @@ export async function updateItem(id: string, patch: Partial<Item>) {
   const previous = cache;
   setCache(cache.map((it) => (it.id === id ? { ...it, ...patch } : it)));
 
-  const payload: Record<string, unknown> = {};
-  if (patch.name !== undefined) payload["name"] = patch.name;
-  if (patch.category !== undefined) payload["category"] = patch.category;
-  if (patch.expiryDate !== undefined) payload["expiry_date"] = patch.expiryDate;
-  if (patch.note !== undefined) payload["note"] = patch.note ?? null;
-  if (patch.usedUp !== undefined) payload["used_up"] = patch.usedUp;
+  const payload: {
+    name?: string;
+    category?: string;
+    expiry_date?: string;
+    note?: string | null;
+    used_up?: boolean;
+  } = {};
+  if (patch.name !== undefined) payload.name = patch.name;
+  if (patch.category !== undefined) payload.category = patch.category;
+  if (patch.expiryDate !== undefined) payload.expiry_date = patch.expiryDate;
+  if (patch.note !== undefined) payload.note = patch.note ?? null;
+  if (patch.usedUp !== undefined) payload.used_up = patch.usedUp;
+
 
   const { error } = await supabase.from("items").update(payload).eq("id", id);
   if (error) setCache(previous);
