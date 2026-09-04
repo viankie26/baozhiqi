@@ -1,6 +1,7 @@
-import type { Item } from "./types";
+import { supabase } from "@/integrations/supabase/client";
+import type { Category, Item } from "./types";
 
-const KEY = "expiry-tracker-items";
+const LOCAL_KEY = "expiry-tracker-items";
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -14,57 +15,176 @@ function isBrowser() {
 }
 
 const EMPTY: Item[] = [];
-let cache: Item[] | null = null;
+let cache: Item[] = EMPTY;
+let loaded = false;
+let loading: Promise<void> | null = null;
 
-function read(): Item[] {
+type Row = {
+  id: string;
+  name: string;
+  category: string;
+  expiry_date: string;
+  note: string | null;
+  used_up: boolean;
+  created_at: string;
+};
+
+function fromRow(r: Row): Item {
+  const item: Item = {
+    id: r.id,
+    name: r.name,
+    category: r.category as Category,
+    expiryDate: r.expiry_date,
+    createdAt: new Date(r.created_at).getTime(),
+    usedUp: r.used_up,
+  };
+  if (r.note) item.note = r.note;
+  return item;
+}
+
+
+function sortItems(items: Item[]): Item[] {
+  return [...items].sort((a, b) => b.createdAt - a.createdAt);
+}
+
+function setCache(items: Item[]) {
+  cache = sortItems(items);
+  emit();
+}
+
+/** Returns a stable (cached) reference so useSyncExternalStore can compare snapshots. */
+export function getItems(): Item[] {
+  return cache;
+}
+
+export function isLoaded(): boolean {
+  return loaded;
+}
+
+/** Reads any records left in this browser from the offline version. */
+function readLocalLegacy(): Item[] {
   if (!isBrowser()) return EMPTY;
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(LOCAL_KEY);
     if (!raw) return EMPTY;
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return EMPTY;
-    return parsed as Item[];
+    return Array.isArray(parsed) ? (parsed as Item[]) : EMPTY;
   } catch {
     return EMPTY;
   }
 }
 
-/** Returns a stable (cached) reference so useSyncExternalStore can compare snapshots. */
-export function getItems(): Item[] {
-  if (cache === null) cache = read();
-  return cache;
-}
-
-export function saveItems(items: Item[]) {
-  if (!isBrowser()) return;
-  localStorage.setItem(KEY, JSON.stringify(items));
-  cache = items;
-  emit();
-}
-
-export function addItem(item: Omit<Item, "id" | "createdAt">): Item {
-  const newItem: Item = {
-    ...item,
-    id:
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : Math.random().toString(36).slice(2),
-    createdAt: Date.now(),
-  };
-  const items = getItems();
-  saveItems([newItem, ...items]);
-  return newItem;
-}
-
-export function updateItem(id: string, patch: Partial<Item>) {
-  const items = getItems().map((it) =>
-    it.id === id ? { ...it, ...patch } : it,
+async function migrateLegacy(userId: string): Promise<boolean> {
+  const legacy = readLocalLegacy();
+  if (legacy.length === 0) return false;
+  const { error } = await supabase.from("items").insert(
+    legacy.map((it) => ({
+      user_id: userId,
+      name: it.name,
+      category: it.category,
+      expiry_date: it.expiryDate,
+      note: it.note ?? null,
+      used_up: !!it.usedUp,
+    })),
   );
-  saveItems(items);
+  if (error) return false;
+  localStorage.removeItem(LOCAL_KEY);
+  return true;
 }
 
-export function deleteItem(id: string) {
-  saveItems(getItems().filter((it) => it.id !== id));
+async function fetchAll() {
+  const { data, error } = await supabase
+    .from("items")
+    .select("id,name,category,expiry_date,note,used_up,created_at")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  setCache(((data ?? []) as Row[]).map(fromRow));
+}
+
+/** Loads the signed-in user's records from the cloud (once per session). */
+export function loadItems(force = false): Promise<void> {
+  if (!isBrowser()) return Promise.resolve();
+  if (loading && !force) return loading;
+  if (loaded && !force) return Promise.resolve();
+
+  loading = (async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData.user;
+    if (!user) {
+      setCache(EMPTY);
+      loaded = true;
+      return;
+    }
+    await fetchAll();
+    if (cache.length === 0 && (await migrateLegacy(user.id))) {
+      await fetchAll();
+    }
+    loaded = true;
+  })().finally(() => {
+    loading = null;
+  });
+
+  return loading;
+}
+
+export function resetItems() {
+  loaded = false;
+  setCache(EMPTY);
+}
+
+export async function addItem(
+  item: Omit<Item, "id" | "createdAt">,
+): Promise<Item | null> {
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData.user;
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("items")
+    .insert({
+      user_id: user.id,
+      name: item.name,
+      category: item.category,
+      expiry_date: item.expiryDate,
+      note: item.note ?? null,
+      used_up: !!item.usedUp,
+    })
+    .select("id,name,category,expiry_date,note,used_up,created_at")
+    .single();
+
+  if (error || !data) return null;
+  const created = fromRow(data as Row);
+  setCache([created, ...cache]);
+  return created;
+}
+
+export async function updateItem(id: string, patch: Partial<Item>) {
+  const previous = cache;
+  setCache(cache.map((it) => (it.id === id ? { ...it, ...patch } : it)));
+
+  const payload: {
+    name?: string;
+    category?: string;
+    expiry_date?: string;
+    note?: string | null;
+    used_up?: boolean;
+  } = {};
+  if (patch.name !== undefined) payload.name = patch.name;
+  if (patch.category !== undefined) payload.category = patch.category;
+  if (patch.expiryDate !== undefined) payload.expiry_date = patch.expiryDate;
+  if (patch.note !== undefined) payload.note = patch.note ?? null;
+  if (patch.usedUp !== undefined) payload.used_up = patch.usedUp;
+
+
+  const { error } = await supabase.from("items").update(payload).eq("id", id);
+  if (error) setCache(previous);
+}
+
+export async function deleteItem(id: string) {
+  const previous = cache;
+  setCache(cache.filter((it) => it.id !== id));
+  const { error } = await supabase.from("items").delete().eq("id", id);
+  if (error) setCache(previous);
 }
 
 export function subscribe(listener: Listener): () => void {
