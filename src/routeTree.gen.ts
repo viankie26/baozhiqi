@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAddRouteImport } from './routes/_authenticated/add'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
@@ -18,6 +19,11 @@ import { Route as AuthenticatedItemIdRouteImport } from './routes/_authenticated
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
@@ -48,12 +54,14 @@ const AuthenticatedItemIdRoute = AuthenticatedItemIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
+  '/auth': typeof AuthRoute
   '/add': typeof AuthenticatedAddRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
   '/item/$id': typeof AuthenticatedItemIdRoute
 }
 export interface FileRoutesByTo {
+  '/auth': typeof AuthRoute
   '/add': typeof AuthenticatedAddRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
@@ -63,6 +71,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/_authenticated/add': typeof AuthenticatedAddRoute
   '/_authenticated/archive': typeof AuthenticatedArchiveRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
@@ -71,12 +80,14 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/add' | '/archive' | '/api/voice-add' | '/item/$id'
+  fullPaths:
+    '/' | '/auth' | '/add' | '/archive' | '/api/voice-add' | '/item/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/add' | '/archive' | '/api/voice-add' | '/' | '/item/$id'
+  to: '/auth' | '/add' | '/archive' | '/api/voice-add' | '/' | '/item/$id'
   id:
     | '__root__'
     | '/_authenticated'
+    | '/auth'
     | '/_authenticated/add'
     | '/_authenticated/archive'
     | '/api/voice-add'
@@ -86,6 +97,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   ApiVoiceAddRoute: typeof ApiVoiceAddRoute
 }
 
@@ -96,6 +108,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/': {
@@ -155,6 +174,7 @@ const AuthenticatedRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   ApiVoiceAddRoute: ApiVoiceAddRoute,
 }
 export const routeTree = rootRouteImport
