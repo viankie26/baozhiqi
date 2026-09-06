@@ -8,8 +8,9 @@ import { urgencyOf } from "@/lib/date";
 import type { Item } from "@/lib/types";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { SignOutButton } from "@/components/SignOutButton";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "保质期记录 · 家中物品到期一目了然" },
@@ -52,7 +53,11 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-warm-bg pb-32">
-      <PageHeader title="保质期记录" kicker={`EXPIRY LEDGER · ${dateline}`} />
+      <PageHeader
+        title="保质期记录"
+        kicker={`EXPIRY LEDGER · ${dateline}`}
+        right={<SignOutButton />}
+      />
 
       <main className="mx-auto max-w-md px-5">
         {/* Numbers strip */}

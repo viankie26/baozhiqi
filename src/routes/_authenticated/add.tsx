@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { addItem } from "@/lib/storage";
 import { startRecording, stopRecording } from "@/lib/voice";
 
-export const Route = createFileRoute("/add")({
+export const Route = createFileRoute("/_authenticated/add")({
   head: () => ({
     meta: [
       { title: "添加物品 · 保质期记录" },

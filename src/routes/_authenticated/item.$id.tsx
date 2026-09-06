@@ -7,7 +7,7 @@ import { deleteItem, updateItem, useItemById } from "@/lib/useItems";
 import { PageHeader } from "@/components/PageHeader";
 import { daysUntil, formatDate, urgencyOf } from "@/lib/date";
 
-export const Route = createFileRoute("/item/$id")({
+export const Route = createFileRoute("/_authenticated/item/$id")({
   head: () => ({
     meta: [
       { title: "物品详情 · 保质期记录" },
