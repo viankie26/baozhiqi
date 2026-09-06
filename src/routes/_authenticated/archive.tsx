@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/archive")({
+export const Route = createFileRoute("/_authenticated/archive")({
   head: () => ({
     meta: [
       { title: "归档 · 保质期记录" },

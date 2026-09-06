@@ -9,24 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AddRouteImport } from './routes/add'
-import { Route as ArchiveRouteImport } from './routes/archive'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedAddRouteImport } from './routes/_authenticated/add'
+import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
 import { Route as ApiVoiceAddRouteImport } from './routes/api/voice-add'
-import { Route as ItemIdRouteImport } from './routes/item.$id'
+import { Route as AuthenticatedItemIdRouteImport } from './routes/_authenticated/item.$id'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/_authenticated/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AddRoute = AddRouteImport.update({
-  id: '/add',
+const AuthenticatedAddRoute = AuthenticatedAddRouteImport.update({
+  id: '/_authenticated/add',
   path: '/add',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ArchiveRoute = ArchiveRouteImport.update({
-  id: '/archive',
+const AuthenticatedArchiveRoute = AuthenticatedArchiveRouteImport.update({
+  id: '/_authenticated/archive',
   path: '/archive',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -35,71 +35,77 @@ const ApiVoiceAddRoute = ApiVoiceAddRouteImport.update({
   path: '/api/voice-add',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ItemIdRoute = ItemIdRouteImport.update({
-  id: '/item/$id',
+const AuthenticatedItemIdRoute = AuthenticatedItemIdRouteImport.update({
+  id: '/_authenticated/item/$id',
   path: '/item/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/add': typeof AddRoute
-  '/archive': typeof ArchiveRoute
+  '/add': typeof AuthenticatedAddRoute
+  '/archive': typeof AuthenticatedArchiveRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
-  '/item/$id': typeof ItemIdRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/item/$id': typeof AuthenticatedItemIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/add': typeof AddRoute
-  '/archive': typeof ArchiveRoute
+  '/add': typeof AuthenticatedAddRoute
+  '/archive': typeof AuthenticatedArchiveRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
-  '/item/$id': typeof ItemIdRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/item/$id': typeof AuthenticatedItemIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/add': typeof AddRoute
-  '/archive': typeof ArchiveRoute
+  '/_authenticated/add': typeof AuthenticatedAddRoute
+  '/_authenticated/archive': typeof AuthenticatedArchiveRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
-  '/item/$id': typeof ItemIdRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/item/$id': typeof AuthenticatedItemIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/add' | '/archive' | '/api/voice-add' | '/item/$id'
+  fullPaths: '/add' | '/archive' | '/api/voice-add' | '/' | '/item/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/add' | '/archive' | '/api/voice-add' | '/item/$id'
-  id: '__root__' | '/' | '/add' | '/archive' | '/api/voice-add' | '/item/$id'
+  to: '/add' | '/archive' | '/api/voice-add' | '/' | '/item/$id'
+  id:
+    | '__root__'
+    | '/_authenticated/add'
+    | '/_authenticated/archive'
+    | '/api/voice-add'
+    | '/_authenticated/'
+    | '/_authenticated/item/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AddRoute: typeof AddRoute
-  ArchiveRoute: typeof ArchiveRoute
+  AuthenticatedAddRoute: typeof AuthenticatedAddRoute
+  AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRoute
   ApiVoiceAddRoute: typeof ApiVoiceAddRoute
-  ItemIdRoute: typeof ItemIdRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedItemIdRoute: typeof AuthenticatedItemIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/add': {
-      id: '/add'
+    '/_authenticated/add': {
+      id: '/_authenticated/add'
       path: '/add'
       fullPath: '/add'
-      preLoaderRoute: typeof AddRouteImport
+      preLoaderRoute: typeof AuthenticatedAddRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/archive': {
-      id: '/archive'
+    '/_authenticated/archive': {
+      id: '/_authenticated/archive'
       path: '/archive'
       fullPath: '/archive'
-      preLoaderRoute: typeof ArchiveRouteImport
+      preLoaderRoute: typeof AuthenticatedArchiveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/voice-add': {
@@ -109,22 +115,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiVoiceAddRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/item/$id': {
-      id: '/item/$id'
+    '/_authenticated/item/$id': {
+      id: '/_authenticated/item/$id'
       path: '/item/$id'
       fullPath: '/item/$id'
-      preLoaderRoute: typeof ItemIdRouteImport
+      preLoaderRoute: typeof AuthenticatedItemIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AddRoute: AddRoute,
-  ArchiveRoute: ArchiveRoute,
+  AuthenticatedAddRoute: AuthenticatedAddRoute,
+  AuthenticatedArchiveRoute: AuthenticatedArchiveRoute,
   ApiVoiceAddRoute: ApiVoiceAddRoute,
-  ItemIdRoute: ItemIdRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedItemIdRoute: AuthenticatedItemIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

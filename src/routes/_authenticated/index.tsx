@@ -9,7 +9,7 @@ import type { Item } from "@/lib/types";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "保质期记录 · 家中物品到期一目了然" },
