@@ -53,7 +53,11 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-warm-bg pb-32">
-      <PageHeader title="保质期记录" kicker={`EXPIRY LEDGER · ${dateline}`} />
+      <PageHeader
+        title="保质期记录"
+        kicker={`EXPIRY LEDGER · ${dateline}`}
+        right={<SignOutButton />}
+      />
 
       <main className="mx-auto max-w-md px-5">
         {/* Numbers strip */}
