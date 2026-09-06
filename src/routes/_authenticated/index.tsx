@@ -8,6 +8,7 @@ import { urgencyOf } from "@/lib/date";
 import type { Item } from "@/lib/types";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { SignOutButton } from "@/components/SignOutButton";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
