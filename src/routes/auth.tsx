@@ -32,7 +32,9 @@ function AuthPage() {
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,6 +56,16 @@ function AuthPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    if (mode === "signup") {
+      if (password.length < 6) {
+        toast.error("密码至少 6 位");
+        return;
+      }
+      if (password !== password2) {
+        toast.error("两次输入的密码不一致");
+        return;
+      }
+    }
     setBusy(true);
     try {
       if (mode === "signup") {
@@ -83,22 +95,24 @@ function AuthPage() {
   }
 
   async function handleGoogle() {
-    setBusy(true);
+    if (googleBusy) return;
+    setGoogleBusy(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
         toast.error("谷歌登录失败，请重试");
+        setGoogleBusy(false);
         return;
       }
-      if (result.redirected) return;
+      // 已登录或即将跳转：保持按钮 loading，交给 onAuthStateChange 直接进入主页
     } catch {
       toast.error("谷歌登录失败，请重试");
-    } finally {
-      setBusy(false);
+      setGoogleBusy(false);
     }
   }
+
 
   return (
     <div className="min-h-screen bg-warm-bg">
@@ -144,27 +158,45 @@ function AuthPage() {
                 onChange={setPassword}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
               />
+              {mode === "signup" && (
+                <Field
+                  label="确认密码 / CONFIRM PASSWORD"
+                  type="password"
+                  value={password2}
+                  onChange={setPassword2}
+                  autoComplete="new-password"
+                />
+              )}
               <button
                 type="submit"
-                disabled={busy}
+                disabled={busy || googleBusy}
                 className="min-h-12 border-2 border-foreground bg-foreground text-background transition active:opacity-80 disabled:opacity-50"
               >
                 <span className="label-kicker">
-                  {mode === "signin" ? "登录 / SIGN IN" : "注册 / SIGN UP"}
+                  {busy
+                    ? "处理中…"
+                    : mode === "signin"
+                      ? "登录 / SIGN IN"
+                      : "注册 / SIGN UP"}
                 </span>
               </button>
             </form>
 
             <button
               onClick={handleGoogle}
-              disabled={busy}
+              disabled={busy || googleBusy}
               className="mt-3 min-h-12 border-2 border-foreground text-foreground transition active:bg-muted disabled:opacity-50"
             >
-              <span className="label-kicker">用谷歌账号继续 / GOOGLE</span>
+              <span className="label-kicker">
+                {googleBusy ? "正在打开谷歌登录…" : "用谷歌账号继续 / GOOGLE"}
+              </span>
             </button>
 
             <button
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              onClick={() => {
+                setMode(mode === "signin" ? "signup" : "signin");
+                setPassword2("");
+              }}
               className="mt-6 text-sm text-muted-foreground underline underline-offset-4"
             >
               {mode === "signin" ? "还没有账号？去注册" : "已有账号？去登录"}
