@@ -6,6 +6,7 @@ import { CATEGORIES, type Category } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { addItem } from "@/lib/storage";
 import { startRecording, stopRecording } from "@/lib/voice";
+import { localDateString } from "@/lib/date";
 
 export const Route = createFileRoute("/_authenticated/add")({
   head: () => ({
@@ -56,7 +57,10 @@ function AddPage() {
       const blob = await stopRecording();
       const res = await fetch("/api/voice-add", {
         method: "POST",
-        headers: { "Content-Type": "audio/wav" },
+        headers: {
+          "Content-Type": "audio/wav",
+          "x-client-date": localDateString(),
+        },
         body: blob,
       });
       const data = (await res.json()) as VoiceResult;

@@ -39,10 +39,14 @@ export function formatDate(expiryDate: string): string {
   return `${d.getMonth() + 1}月${d.getDate()}日 周${ZH_WEEK[d.getDay()]}`;
 }
 
+/** Device-local date as YYYY-MM-DD (no UTC conversion). */
+export function localDateString(d: Date = new Date()): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 /** Parse loose Chinese/numeric date strings from voice transcript into YYYY-MM-DD. */
-export function parseLooseDate(input: string): string | null {
+export function parseLooseDate(input: string, now: Date = new Date()): string | null {
   if (!input) return null;
-  const now = new Date();
   const s = input.trim();
 
   // Already ISO
