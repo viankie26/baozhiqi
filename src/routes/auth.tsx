@@ -56,6 +56,16 @@ function AuthPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    if (mode === "signup") {
+      if (password.length < 6) {
+        toast.error("密码至少 6 位");
+        return;
+      }
+      if (password !== password2) {
+        toast.error("两次输入的密码不一致");
+        return;
+      }
+    }
     setBusy(true);
     try {
       if (mode === "signup") {
@@ -85,22 +95,24 @@ function AuthPage() {
   }
 
   async function handleGoogle() {
-    setBusy(true);
+    if (googleBusy) return;
+    setGoogleBusy(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
         toast.error("谷歌登录失败，请重试");
+        setGoogleBusy(false);
         return;
       }
-      if (result.redirected) return;
+      // 已登录或即将跳转：保持按钮 loading，交给 onAuthStateChange 直接进入主页
     } catch {
       toast.error("谷歌登录失败，请重试");
-    } finally {
-      setBusy(false);
+      setGoogleBusy(false);
     }
   }
+
 
   return (
     <div className="min-h-screen bg-warm-bg">
