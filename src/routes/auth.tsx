@@ -27,6 +27,35 @@ export const Route = createFileRoute("/auth")({
 
 type Mode = "signin" | "signup";
 
+const COOLDOWN_KEY = "expiry-tracker-signup-guard";
+const MAX_ATTEMPTS = 3;
+const COOLDOWN_MS = 5 * 60 * 1000;
+
+function newChallenge() {
+  const a = 2 + Math.floor(Math.random() * 8);
+  const b = 2 + Math.floor(Math.random() * 8);
+  return { a, b, answer: a + b };
+}
+
+function readGuard(): { count: number; until: number } {
+  try {
+    const raw = localStorage.getItem(COOLDOWN_KEY);
+    if (!raw) return { count: 0, until: 0 };
+    const parsed = JSON.parse(raw) as { count?: number; until?: number };
+    return { count: parsed.count ?? 0, until: parsed.until ?? 0 };
+  } catch {
+    return { count: 0, until: 0 };
+  }
+}
+
+function writeGuard(value: { count: number; until: number }) {
+  try {
+    localStorage.setItem(COOLDOWN_KEY, JSON.stringify(value));
+  } catch {
+    /* ignore */
+  }
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("signin");
@@ -36,6 +65,18 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  // 反机器人：蜜罐字段 + 最短填写时间 + 算术验证 + 本机冷却
+  const [honeypot, setHoneypot] = useState("");
+  const [challenge, setChallenge] = useState(() => newChallenge());
+  const [challengeInput, setChallengeInput] = useState("");
+  const [formOpenedAt] = useState(() => Date.now());
+  const [lockedUntil, setLockedUntil] = useState(0);
+
+  useEffect(() => {
+    const guard = readGuard();
+    if (guard.until > Date.now()) setLockedUntil(guard.until);
+  }, []);
+
 
   useEffect(() => {
     let cancelled = false;
