@@ -27,6 +27,35 @@ export const Route = createFileRoute("/auth")({
 
 type Mode = "signin" | "signup";
 
+const COOLDOWN_KEY = "expiry-tracker-signup-guard";
+const MAX_ATTEMPTS = 3;
+const COOLDOWN_MS = 5 * 60 * 1000;
+
+function newChallenge() {
+  const a = 2 + Math.floor(Math.random() * 8);
+  const b = 2 + Math.floor(Math.random() * 8);
+  return { a, b, answer: a + b };
+}
+
+function readGuard(): { count: number; until: number } {
+  try {
+    const raw = localStorage.getItem(COOLDOWN_KEY);
+    if (!raw) return { count: 0, until: 0 };
+    const parsed = JSON.parse(raw) as { count?: number; until?: number };
+    return { count: parsed.count ?? 0, until: parsed.until ?? 0 };
+  } catch {
+    return { count: 0, until: 0 };
+  }
+}
+
+function writeGuard(value: { count: number; until: number }) {
+  try {
+    localStorage.setItem(COOLDOWN_KEY, JSON.stringify(value));
+  } catch {
+    /* ignore */
+  }
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("signin");
@@ -36,6 +65,18 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  // 反机器人：蜜罐字段 + 最短填写时间 + 算术验证 + 本机冷却
+  const [honeypot, setHoneypot] = useState("");
+  const [challenge, setChallenge] = useState(() => newChallenge());
+  const [challengeInput, setChallengeInput] = useState("");
+  const [formOpenedAt] = useState(() => Date.now());
+  const [lockedUntil, setLockedUntil] = useState(0);
+
+  useEffect(() => {
+    const guard = readGuard();
+    if (guard.until > Date.now()) setLockedUntil(guard.until);
+  }, []);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -56,7 +97,28 @@ function AuthPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    if (lockedUntil > Date.now()) {
+      const mins = Math.max(1, Math.ceil((lockedUntil - Date.now()) / 60000));
+      toast.error(`操作过于频繁，请 ${mins} 分钟后再试`);
+      return;
+    }
     if (mode === "signup") {
+      // 蜜罐：真人看不到这个输入框，只有自动脚本会填
+      if (honeypot.trim() !== "") {
+        toast.error("注册失败，请重试");
+        return;
+      }
+      // 填写太快说明是脚本
+      if (Date.now() - formOpenedAt < 2500) {
+        toast.error("请慢一点，稍后再试一次");
+        return;
+      }
+      if (Number(challengeInput.trim()) !== challenge.answer) {
+        toast.error("验证题答案不正确");
+        setChallenge(newChallenge());
+        setChallengeInput("");
+        return;
+      }
       if (password.length < 6) {
         toast.error("密码至少 6 位");
         return;
@@ -75,6 +137,12 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
+        // 本机注册次数限制
+        const guard = readGuard();
+        const count = guard.count + 1;
+        const until = count >= MAX_ATTEMPTS ? Date.now() + COOLDOWN_MS : 0;
+        writeGuard({ count, until });
+        if (until) setLockedUntil(until);
         if (!data.session) {
           setSentTo(email);
           toast.success("确认邮件已发送，请查收后点击链接");
@@ -89,10 +157,15 @@ function AuthPage() {
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "操作失败，请重试");
+      if (mode === "signup") {
+        setChallenge(newChallenge());
+        setChallengeInput("");
+      }
     } finally {
       setBusy(false);
     }
   }
+
 
   async function handleGoogle() {
     if (googleBusy) return;
@@ -159,14 +232,34 @@ function AuthPage() {
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
               />
               {mode === "signup" && (
-                <Field
-                  label="确认密码 / CONFIRM PASSWORD"
-                  type="password"
-                  value={password2}
-                  onChange={setPassword2}
-                  autoComplete="new-password"
-                />
+                <>
+                  <Field
+                    label="确认密码 / CONFIRM PASSWORD"
+                    type="password"
+                    value={password2}
+                    onChange={setPassword2}
+                    autoComplete="new-password"
+                  />
+                  <Field
+                    label={`验证：${challenge.a} + ${challenge.b} = ?`}
+                    type="text"
+                    value={challengeInput}
+                    onChange={setChallengeInput}
+                    autoComplete="off"
+                  />
+                  {/* 蜜罐字段：对真人隐藏 */}
+                  <input
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    className="pointer-events-none absolute h-0 w-0 opacity-0"
+                  />
+                </>
               )}
+
               <button
                 type="submit"
                 disabled={busy || googleBusy}
