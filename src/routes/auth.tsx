@@ -158,27 +158,45 @@ function AuthPage() {
                 onChange={setPassword}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
               />
+              {mode === "signup" && (
+                <Field
+                  label="确认密码 / CONFIRM PASSWORD"
+                  type="password"
+                  value={password2}
+                  onChange={setPassword2}
+                  autoComplete="new-password"
+                />
+              )}
               <button
                 type="submit"
-                disabled={busy}
+                disabled={busy || googleBusy}
                 className="min-h-12 border-2 border-foreground bg-foreground text-background transition active:opacity-80 disabled:opacity-50"
               >
                 <span className="label-kicker">
-                  {mode === "signin" ? "登录 / SIGN IN" : "注册 / SIGN UP"}
+                  {busy
+                    ? "处理中…"
+                    : mode === "signin"
+                      ? "登录 / SIGN IN"
+                      : "注册 / SIGN UP"}
                 </span>
               </button>
             </form>
 
             <button
               onClick={handleGoogle}
-              disabled={busy}
+              disabled={busy || googleBusy}
               className="mt-3 min-h-12 border-2 border-foreground text-foreground transition active:bg-muted disabled:opacity-50"
             >
-              <span className="label-kicker">用谷歌账号继续 / GOOGLE</span>
+              <span className="label-kicker">
+                {googleBusy ? "正在打开谷歌登录…" : "用谷歌账号继续 / GOOGLE"}
+              </span>
             </button>
 
             <button
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              onClick={() => {
+                setMode(mode === "signin" ? "signup" : "signin");
+                setPassword2("");
+              }}
               className="mt-6 text-sm text-muted-foreground underline underline-offset-4"
             >
               {mode === "signin" ? "还没有账号？去注册" : "已有账号？去登录"}
