@@ -97,7 +97,28 @@ function AuthPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    if (lockedUntil > Date.now()) {
+      const mins = Math.max(1, Math.ceil((lockedUntil - Date.now()) / 60000));
+      toast.error(`操作过于频繁，请 ${mins} 分钟后再试`);
+      return;
+    }
     if (mode === "signup") {
+      // 蜜罐：真人看不到这个输入框，只有自动脚本会填
+      if (honeypot.trim() !== "") {
+        toast.error("注册失败，请重试");
+        return;
+      }
+      // 填写太快说明是脚本
+      if (Date.now() - formOpenedAt < 2500) {
+        toast.error("请慢一点，稍后再试一次");
+        return;
+      }
+      if (Number(challengeInput.trim()) !== challenge.answer) {
+        toast.error("验证题答案不正确");
+        setChallenge(newChallenge());
+        setChallengeInput("");
+        return;
+      }
       if (password.length < 6) {
         toast.error("密码至少 6 位");
         return;
@@ -116,6 +137,12 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
+        // 本机注册次数限制
+        const guard = readGuard();
+        const count = guard.count + 1;
+        const until = count >= MAX_ATTEMPTS ? Date.now() + COOLDOWN_MS : 0;
+        writeGuard({ count, until });
+        if (until) setLockedUntil(until);
         if (!data.session) {
           setSentTo(email);
           toast.success("确认邮件已发送，请查收后点击链接");
@@ -130,10 +157,15 @@ function AuthPage() {
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "操作失败，请重试");
+      if (mode === "signup") {
+        setChallenge(newChallenge());
+        setChallengeInput("");
+      }
     } finally {
       setBusy(false);
     }
   }
+
 
   async function handleGoogle() {
     if (googleBusy) return;
