@@ -232,14 +232,34 @@ function AuthPage() {
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
               />
               {mode === "signup" && (
-                <Field
-                  label="确认密码 / CONFIRM PASSWORD"
-                  type="password"
-                  value={password2}
-                  onChange={setPassword2}
-                  autoComplete="new-password"
-                />
+                <>
+                  <Field
+                    label="确认密码 / CONFIRM PASSWORD"
+                    type="password"
+                    value={password2}
+                    onChange={setPassword2}
+                    autoComplete="new-password"
+                  />
+                  <Field
+                    label={`验证：${challenge.a} + ${challenge.b} = ?`}
+                    type="text"
+                    value={challengeInput}
+                    onChange={setChallengeInput}
+                    autoComplete="off"
+                  />
+                  {/* 蜜罐字段：对真人隐藏 */}
+                  <input
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    className="pointer-events-none absolute h-0 w-0 opacity-0"
+                  />
+                </>
               )}
+
               <button
                 type="submit"
                 disabled={busy || googleBusy}
