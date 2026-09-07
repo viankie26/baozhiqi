@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { parseLooseDate } from "@/lib/date";
+import { localDateString, parseLooseDate } from "@/lib/date";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const STT_MODEL = "openai/gpt-4o-mini-transcribe";
