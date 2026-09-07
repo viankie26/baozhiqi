@@ -1,6 +1,6 @@
 # 保质期记录
 
-我需要创建一个记录东西保质期的应用，主要是移动端web应用，要简便，支持语音，帮我策划一下
+极简保质期记录功能，支持语音。
 
 This project was built with [Lovable](https://lovable.dev).
 
