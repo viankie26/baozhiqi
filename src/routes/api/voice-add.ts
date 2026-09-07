@@ -54,9 +54,16 @@ export const Route = createFileRoute("/api/voice-add")({
           return Response.json({ error: "没听清，请再说一次" }, { status: 422 });
         }
 
+        // Client's device-local date (YYYY-MM-DD) — never use server UTC time.
+        const clientDateRaw = request.headers.get("x-client-date") ?? "";
+        const clientDate = /^\d{4}-\d{2}-\d{2}$/.test(clientDateRaw)
+          ? clientDateRaw
+          : localDateString();
+        const clientNow = new Date(clientDate + "T12:00:00");
+
         // 2. Parse transcript into structured fields via chat completion
-        const parsed = await parseTranscript(apiKey, transcript);
-        const fallbackDate = parseLooseDate(transcript);
+        const parsed = await parseTranscript(apiKey, transcript, clientDate);
+        const fallbackDate = parseLooseDate(transcript, clientNow);
         return Response.json({
           transcript,
           name: parsed?.name ?? "",
@@ -69,8 +76,11 @@ export const Route = createFileRoute("/api/voice-add")({
   },
 });
 
-async function parseTranscript(apiKey: string, transcript: string): Promise<Parsed | null> {
-  const today = new Date().toISOString().slice(0, 10);
+async function parseTranscript(
+  apiKey: string,
+  transcript: string,
+  today: string,
+): Promise<Parsed | null> {
   const system =
     `你是一个保质期记录助手。今天是 ${today}（请以此推断相对日期）。` +
     "转写文本可能是繁体或中文数字（如“九月十五號”），请转换为简体与阿拉伯数字。用户用中文口语描述一件物品及其过期时间。请把转写文本解析为结构化 JSON。" +
