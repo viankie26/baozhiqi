@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Trash2, CheckCircle2 } from "lucide-react";
+import { Trash2, CheckCircle2, CalendarPlus } from "lucide-react";
+import { addToCalendar } from "@/lib/calendar";
 import { CATEGORIES, type Category } from "@/lib/types";
 import { deleteItem, updateItem, useItemById } from "@/lib/useItems";
 import { PageHeader } from "@/components/PageHeader";
@@ -105,6 +106,16 @@ function ItemDetailPage() {
             {formatDate(item.expiryDate)}
           </span>
         </div>
+
+        <button
+          onClick={() => {
+            addToCalendar(item);
+            toast.success("已生成日历提醒，请在弹窗中添加");
+          }}
+          className="label-kicker mt-4 flex w-full items-center justify-center gap-1.5 border-2 border-foreground py-3 text-foreground transition active:bg-muted"
+        >
+          <CalendarPlus className="h-3.5 w-3.5" /> 同步到系统日历 / CALENDAR
+        </button>
 
         <div className="flex flex-col gap-6 pt-7">
           <Field label="物品名称 / NAME">
