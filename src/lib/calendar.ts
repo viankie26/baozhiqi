@@ -49,11 +49,10 @@ export function buildIcs(item: Item): string {
 
 export function addToCalendar(item: Item) {
   const ics = buildIcs(item);
-  const url = `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${item.name}-到期提醒.ics`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  // Blob URL + 直接跳转：iOS 会识别 text/calendar 并弹出「添加到日历」确认框，
+  // 而不是把 .ics 当普通文件下载。
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  window.location.href = url;
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
