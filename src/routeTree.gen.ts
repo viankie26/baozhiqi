@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAddRouteImport } from './routes/_authenticated/add'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
+import { Route as ApiCalendarRouteImport } from './routes/api/calendar'
 import { Route as ApiVoiceAddRouteImport } from './routes/api/voice-add'
 import { Route as AuthenticatedItemIdRouteImport } from './routes/_authenticated/item.$id'
 
@@ -41,6 +42,11 @@ const AuthenticatedArchiveRoute = AuthenticatedArchiveRouteImport.update({
   path: '/archive',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiCalendarRoute = ApiCalendarRouteImport.update({
+  id: '/api/calendar',
+  path: '/api/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiVoiceAddRoute = ApiVoiceAddRouteImport.update({
   id: '/api/voice-add',
   path: '/api/voice-add',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/add': typeof AuthenticatedAddRoute
   '/archive': typeof AuthenticatedArchiveRoute
+  '/api/calendar': typeof ApiCalendarRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
   '/item/$id': typeof AuthenticatedItemIdRoute
 }
@@ -64,6 +71,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/add': typeof AuthenticatedAddRoute
   '/archive': typeof AuthenticatedArchiveRoute
+  '/api/calendar': typeof ApiCalendarRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
   '/': typeof AuthenticatedIndexRoute
   '/item/$id': typeof AuthenticatedItemIdRoute
@@ -74,6 +82,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/add': typeof AuthenticatedAddRoute
   '/_authenticated/archive': typeof AuthenticatedArchiveRoute
+  '/api/calendar': typeof ApiCalendarRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/item/$id': typeof AuthenticatedItemIdRoute
@@ -81,15 +90,29 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/add' | '/archive' | '/api/voice-add' | '/item/$id'
+    | '/'
+    | '/auth'
+    | '/add'
+    | '/archive'
+    | '/api/calendar'
+    | '/api/voice-add'
+    | '/item/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/add' | '/archive' | '/api/voice-add' | '/' | '/item/$id'
+  to:
+    | '/auth'
+    | '/add'
+    | '/archive'
+    | '/api/calendar'
+    | '/api/voice-add'
+    | '/'
+    | '/item/$id'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/add'
     | '/_authenticated/archive'
+    | '/api/calendar'
     | '/api/voice-add'
     | '/_authenticated/'
     | '/_authenticated/item/$id'
@@ -98,6 +121,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiCalendarRoute: typeof ApiCalendarRoute
   ApiVoiceAddRoute: typeof ApiVoiceAddRoute
 }
 
@@ -138,6 +162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedArchiveRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/calendar': {
+      id: '/api/calendar'
+      path: '/api/calendar'
+      fullPath: '/api/calendar'
+      preLoaderRoute: typeof ApiCalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/voice-add': {
       id: '/api/voice-add'
       path: '/api/voice-add'
@@ -175,6 +206,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiCalendarRoute: ApiCalendarRoute,
   ApiVoiceAddRoute: ApiVoiceAddRoute,
 }
 export const routeTree = rootRouteImport
