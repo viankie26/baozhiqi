@@ -108,8 +108,8 @@ export function loadItems(force = false): Promise<void> {
   if (loaded && !force) return Promise.resolve();
 
   loading = (async () => {
-    const { data: userData } = await supabase.auth.getUser();
-    const user = userData.user;
+    const { data: sessData } = await supabase.auth.getSession();
+    const user = sessData.session?.user;
     if (!user) {
       setCache(EMPTY);
       loaded = true;
@@ -135,8 +135,8 @@ export function resetItems() {
 export async function addItem(
   item: Omit<Item, "id" | "createdAt">,
 ): Promise<Item | null> {
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData.user;
+  const { data: sessData } = await supabase.auth.getSession();
+  const user = sessData.session?.user;
   if (!user) return null;
 
   const { data, error } = await supabase
