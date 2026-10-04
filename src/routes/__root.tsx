@@ -128,13 +128,19 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") {
+    let currentUserId: string | null | undefined;
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      const nextId = session?.user?.id ?? null;
+      if (event === "INITIAL_SESSION") {
+        currentUserId = nextId;
         return;
       }
+      // Only reset when the account actually changes (SIGNED_IN also fires on app focus).
+      if (nextId === currentUserId) return;
+      currentUserId = nextId;
       resetItems();
       void router.invalidate();
-      if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
+      if (nextId) void queryClient.invalidateQueries();
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
