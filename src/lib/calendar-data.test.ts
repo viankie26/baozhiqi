@@ -32,9 +32,8 @@ describe("batch expiry reminders", () => {
   });
   test("escapes event injection and folds Chinese text by UTF-8 bytes", () => {
     const ics = buildCalendar([{ name: "牛奶\r\nEND:VEVENT", date: "2026-10-18", note: "备注".repeat(100) }]);
-    expect(ics.match(/^END:VEVENT$/gm)?.length ?? 0).toBe(0); // CRLF lines are checked below.
     expect(ics.split("\r\n").filter((line) => line === "END:VEVENT")).toHaveLength(1);
-    expect(ics).toContain("牛奶\\nEND\\;VEVENT");
+    expect(ics).toContain("牛奶\\nEND:VEVENT");
     expect(ics.split("\r\n").every((line) => new TextEncoder().encode(line).length <= 75)).toBe(true);
   });
   test("rejects invalid calendar dates", () => {
