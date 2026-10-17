@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Mic, Loader2 } from "lucide-react";
-import { CATEGORIES, type Category } from "@/lib/types";
+import { CATEGORIES, PRESET_ITEMS, type Category } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { addItem } from "@/lib/storage";
 import { startRecording, stopRecording } from "@/lib/voice";
@@ -174,6 +174,25 @@ function AddPage() {
                   {c.label}
                 </button>
               ))}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {PRESET_ITEMS[category].map((preset) => {
+                const active = name === preset;
+                return (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setName(active ? "" : preset)}
+                    className={`label-kicker border px-3 py-2 transition active:opacity-70 ${
+                      active
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border text-muted-foreground"
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                );
+              })}
             </div>
           </Field>
 

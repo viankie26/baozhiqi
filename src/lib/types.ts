@@ -30,3 +30,11 @@ export const CATEGORY_EMOJI: Record<Category, string> = {
   daily: "🧴",
   other: "📦",
 };
+
+/** 常用物品快捷选项：按分类预设，添加页点一下即可填入名称。 */
+export const PRESET_ITEMS: Record<Category, string[]> = {
+  food: ["牛奶", "鸡蛋", "酸奶", "面包", "豆浆", "水果", "蔬菜", "剩菜"],
+  medicine: ["感冒药", "退烧药", "肠胃药", "维生素", "创可贴", "眼药水"],
+  daily: ["洗发水", "沐浴露", "牙膏", "洗面奶", "防晒霜", "洗衣液"],
+  other: ["电池", "纸巾", "垃圾袋", "调味料", "干货"],
+};
