@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
 import { buildCalendar, calendarEntries, validCalendarDate } from "./calendar-data";
 import type { Item } from "./types";
