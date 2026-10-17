@@ -1,6 +1,6 @@
 import { CATEGORY_LABEL, type Item } from "./types";
 
-export type CalendarEntry = { id?: string; name: string; date: string; category?: string; note?: string };
+export type CalendarEntry = { id?: string | undefined; name: string; date: string; category?: string | undefined; note?: string | undefined };
 
 export function calendarEntries(items: Item[]): CalendarEntry[] {
   return items.filter((item) => !item.usedUp).map((item) => ({
