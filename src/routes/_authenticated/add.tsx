@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Mic, Loader2 } from "lucide-react";
-import { CATEGORIES, type Category } from "@/lib/types";
+import { CATEGORIES, PRESET_ITEMS, type Category } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { addItem } from "@/lib/storage";
 import { startRecording, stopRecording } from "@/lib/voice";
