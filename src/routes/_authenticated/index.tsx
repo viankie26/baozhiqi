@@ -6,9 +6,11 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { urgencyOf } from "@/lib/date";
 import type { Item } from "@/lib/types";
-import { Trash2 } from "lucide-react";
+import { CalendarPlus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { SignOutButton } from "@/components/SignOutButton";
+import { Button } from "@/components/ui/button";
+import { addAllToCalendar } from "@/lib/calendar";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -82,6 +84,24 @@ function Index() {
             ⚠ {alertCount} 件需要处理
           </p>
         )}
+
+        <div className="border-b border-border py-3">
+          <Button
+            variant="outline"
+            className="w-full rounded-none"
+            disabled={active.length === 0}
+            onClick={() => {
+              try {
+                addAllToCalendar(items);
+              } catch {
+                toast.error("日历提醒生成失败，请重试");
+              }
+            }}
+          >
+            <CalendarPlus />
+            全部添加到日历{active.length > 0 ? `（${active.length} 件）` : ""}
+          </Button>
+        </div>
 
         {/* Filter tabs */}
         <div className="flex gap-5 border-b border-border py-3">

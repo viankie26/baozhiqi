@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep single and batch calendar export on the same pure ICS serializer so dates, alarms, and escaping stay consistent.
+- Batch calendar exports POST caller-supplied records to the same-origin formatter; it must not read account data, persist exports, or put batch names/notes in URLs.
