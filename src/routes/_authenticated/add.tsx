@@ -175,6 +175,25 @@ function AddPage() {
                 </button>
               ))}
             </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {PRESET_ITEMS[category].map((preset) => {
+                const active = name === preset;
+                return (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setName(active ? "" : preset)}
+                    className={`label-kicker border px-3 py-2 transition active:opacity-70 ${
+                      active
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border text-muted-foreground"
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                );
+              })}
+            </div>
           </Field>
 
           <Field label="过期日期 / EXPIRY">
