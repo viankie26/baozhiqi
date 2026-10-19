@@ -6,6 +6,7 @@ import { addToCalendar } from "@/lib/calendar";
 import { CATEGORIES, type Category } from "@/lib/types";
 import { deleteItem, updateItem, useItemById } from "@/lib/useItems";
 import { PageHeader } from "@/components/PageHeader";
+import { ExpiryDateInput } from "@/components/ExpiryDateInput";
 import { daysUntil, formatDate, urgencyOf } from "@/lib/date";
 
 export const Route = createFileRoute("/_authenticated/item/$id")({
@@ -143,12 +144,7 @@ function ItemDetailPage() {
             </div>
           </Field>
           <Field label="过期日期 / EXPIRY">
-            <input
-              type="date"
-              className={inputClass}
-              value={expiryDate}
-              onChange={(e) => setExpiryDate(e.target.value)}
-            />
+            <ExpiryDateInput value={expiryDate} onChange={setExpiryDate} />
           </Field>
           <Field label="备注 / NOTE">
             <input

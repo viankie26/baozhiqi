@@ -36,7 +36,7 @@ const ZH_WEEK = ["日", "一", "二", "三", "四", "五", "六"];
 
 export function formatDate(expiryDate: string): string {
   const d = new Date(expiryDate + "T00:00:00");
-  return `${d.getMonth() + 1}月${d.getDate()}日 周${ZH_WEEK[d.getDay()]}`;
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 周${ZH_WEEK[d.getDay()]}`;
 }
 
 /** Device-local date as YYYY-MM-DD (no UTC conversion). */

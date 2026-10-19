@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Mic, Loader2 } from "lucide-react";
 import { CATEGORIES, PRESET_ITEMS, type Category } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
+import { ExpiryDateInput } from "@/components/ExpiryDateInput";
 import { addItem } from "@/lib/storage";
 import { startRecording, stopRecording } from "@/lib/voice";
 import { localDateString } from "@/lib/date";
@@ -197,12 +198,7 @@ function AddPage() {
           </Field>
 
           <Field label="过期日期 / EXPIRY">
-            <input
-              type="date"
-              className={inputClass}
-              value={expiryDate}
-              onChange={(e) => setExpiryDate(e.target.value)}
-            />
+            <ExpiryDateInput value={expiryDate} onChange={setExpiryDate} />
           </Field>
 
           <Field label="备注 / NOTE">
