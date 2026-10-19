@@ -95,7 +95,7 @@ export function ExpiryDateInput({
             <Calendar
               mode="single"
               selected={value ? new Date(`${value}T00:00:00`) : undefined}
-              defaultMonth={value ? new Date(`${value}T00:00:00`) : undefined}
+              {...(value ? { defaultMonth: new Date(`${value}T00:00:00`) } : {})}
               onSelect={(date) => {
                 if (!date) return;
                 const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
