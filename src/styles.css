@@ -238,3 +238,11 @@
 @utility animate-pulse-ring {
   animation: pulse-ring 1.8s ease-out infinite;
 }
+
+/* iOS standalone (添加到主屏幕) immersive mode: keep content clear of notch & home indicator. */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
