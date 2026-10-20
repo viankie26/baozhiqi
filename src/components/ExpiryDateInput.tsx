@@ -2,8 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { formatDate } from "@/lib/date";
-import { composeExpiryDate, splitExpiryDate } from "@/lib/expiry-input";
+import { formatDate, localDateString } from "@/lib/date";
+import {
+  DATE_PRESETS,
+  composeExpiryDate,
+  offsetExpiryDate,
+  splitExpiryDate,
+} from "@/lib/expiry-input";
 
 /**
  * Expiry date entry: 年 / 月 / 日 fields where the year only needs two digits
@@ -42,6 +47,16 @@ export function ExpiryDateInput({
     const iso = composeExpiryDate(y, m, d);
     lastEmitted.current = iso ?? "";
     onChange(iso ?? "");
+  }
+
+  // Write a finished date back into the three fields and up to the parent.
+  function applyIso(iso: string) {
+    const parts = splitExpiryDate(iso);
+    setYear(parts.year);
+    setMonth(parts.month);
+    setDay(parts.day);
+    lastEmitted.current = iso;
+    onChange(iso);
   }
 
   return (
@@ -98,15 +113,7 @@ export function ExpiryDateInput({
               {...(value ? { defaultMonth: new Date(`${value}T00:00:00`) } : {})}
               onSelect={(date) => {
                 if (!date) return;
-                const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-                  date.getDate(),
-                ).padStart(2, "0")}`;
-                const parts = splitExpiryDate(iso);
-                setYear(parts.year);
-                setMonth(parts.month);
-                setDay(parts.day);
-                lastEmitted.current = iso;
-                onChange(iso);
+                applyIso(localDateString(date));
                 setOpen(false);
               }}
               initialFocus
@@ -114,6 +121,28 @@ export function ExpiryDateInput({
             />
           </PopoverContent>
         </Popover>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {DATE_PRESETS.map((preset) => {
+          const target = offsetExpiryDate(preset.id);
+          const active = value === target;
+          return (
+            <button
+              key={preset.id}
+              type="button"
+              aria-label={`过期日期设为${preset.label}`}
+              onClick={() => applyIso(target)}
+              className={`label-kicker min-h-11 border px-3.5 transition active:opacity-70 ${
+                active
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border text-muted-foreground"
+              }`}
+            >
+              {preset.label}
+            </button>
+          );
+        })}
       </div>
 
       {value ? (
