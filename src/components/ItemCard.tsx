@@ -52,7 +52,7 @@ export function ItemCard({ item, muted }: { item: Item; muted?: boolean }) {
         </p>
       </div>
 
-      <div className="shrink-0 text-right">
+      <div className="w-[5.5rem] shrink-0 text-center">
         <span
           className={`font-display block text-[2.5rem] leading-none tabular-nums ${tone[urgency]}`}
         >
