@@ -28,7 +28,7 @@ export function ItemCard({ item, muted }: { item: Item; muted?: boolean }) {
     <Link
       to="/item/$id"
       params={{ id: item.id }}
-      className={`group grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-4 py-4 transition ${
+      className={`group grid grid-cols-[minmax(0,1fr)_5.5rem] items-center gap-4 py-4 transition ${
         muted ? "opacity-55" : ""
       }`}
     >

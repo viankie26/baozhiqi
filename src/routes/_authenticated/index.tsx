@@ -137,9 +137,7 @@ function Index() {
             {showNormal && normal.length > 0 && (
               <Section title="正常 / IN DATE">
                 {normal.map((it) => (
-                  <div key={it.id} className="hair-b">
-                    <ItemCard item={it} />
-                  </div>
+                  <ExpiringRow key={it.id} item={it} canDelete={false} />
                 ))}
               </Section>
             )}
@@ -200,14 +198,16 @@ function Tab({
   );
 }
 
-function ExpiringRow({ item }: { item: Item }) {
+function ExpiringRow({ item, canDelete = true }: { item: Item; canDelete?: boolean }) {
   return (
-    <div className="hair-b grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+    <div className="hair-b grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-2">
       <div className="min-w-0">
         <ItemCard item={item} />
       </div>
-      <button
-        className="flex h-11 w-11 shrink-0 items-center justify-center border border-border text-muted-foreground transition active:bg-muted"
+      {canDelete ? <Button
+        variant="outline"
+        size="icon"
+        className="h-11 w-11 shrink-0 rounded-none text-muted-foreground"
         aria-label="删除"
         onClick={() => {
           deleteItem(item.id);
@@ -215,7 +215,7 @@ function ExpiringRow({ item }: { item: Item }) {
         }}
       >
         <Trash2 className="h-4 w-4" />
-      </button>
+      </Button> : <span aria-hidden="true" className="h-11 w-11" />}
     </div>
   );
 }
