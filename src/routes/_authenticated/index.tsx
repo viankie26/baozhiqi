@@ -37,6 +37,7 @@ type Filter = "all" | "soon" | "expired";
 function Index() {
   const items = useItems();
   const [filter, setFilter] = useState<Filter>("all");
+  const [editing, setEditing] = useState(false);
 
   const active = items.filter((it) => !it.usedUp);
   const expired = active.filter((it) => urgencyOf(it) === "expired");
@@ -104,7 +105,7 @@ function Index() {
         </div>
 
         {/* Filter tabs */}
-        <div className="flex gap-5 border-b border-border py-3">
+        <div className="flex items-center gap-5 border-b border-border py-3">
           <Tab active={filter === "all"} onClick={() => setFilter("all")}>
             全部
           </Tab>
@@ -114,6 +115,18 @@ function Index() {
           <Tab active={filter === "expired"} onClick={() => setFilter("expired")}>
             过期 {expired.length}
           </Tab>
+          {active.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto shrink-0 rounded-none"
+              aria-pressed={editing}
+              onClick={() => setEditing((value) => !value)}
+            >
+              {editing ? <X /> : <Pencil />}
+              {editing ? "完成" : "编辑"}
+            </Button>
+          )}
         </div>
 
         {active.length === 0 ? (
@@ -123,21 +136,21 @@ function Index() {
             {showExpired && expired.length > 0 && (
               <Section title="已过期 / OVERDUE">
                 {expired.map((it) => (
-                  <ExpiringRow key={it.id} item={it} />
+                  <ExpiringRow key={it.id} item={it} editing={editing} />
                 ))}
               </Section>
             )}
             {showSoon && soon.length > 0 && (
               <Section title="即将过期 / DUE SOON">
                 {soon.map((it) => (
-                  <ExpiringRow key={it.id} item={it} />
+                  <ExpiringRow key={it.id} item={it} editing={editing} />
                 ))}
               </Section>
             )}
             {showNormal && normal.length > 0 && (
               <Section title="正常 / IN DATE">
                 {normal.map((it) => (
-                  <ExpiringRow key={it.id} item={it} canDelete={false} />
+                  <ExpiringRow key={it.id} item={it} editing={editing} />
                 ))}
               </Section>
             )}
@@ -198,27 +211,25 @@ function Tab({
   );
 }
 
-function ExpiringRow({ item, canDelete = true }: { item: Item; canDelete?: boolean }) {
-  const [editing, setEditing] = useState(false);
-
+function ExpiringRow({ item, editing }: { item: Item; editing: boolean }) {
   return (
     <div
-      className={`hair-b grid grid-cols-[minmax(0,1fr)_5.25rem] items-center gap-1 transition ${
-        editing ? "bg-foreground/[0.06]" : ""
+      className={`hair-b grid items-center transition ${
+        editing
+          ? "grid-cols-[minmax(0,1fr)_2.75rem] gap-1 bg-foreground/[0.06]"
+          : "grid-cols-[minmax(0,1fr)]"
       }`}
     >
       <div className="min-w-0">
         <ItemCard item={item} />
       </div>
-      {canDelete ? (
-        <div className="flex h-11 w-[5.25rem] shrink-0 items-center justify-end gap-2">
-          {editing ? (
-            <>
+      {editing && (
+        <div className="flex h-11 w-11 shrink-0 items-center justify-end">
               <Button
                 variant="outline"
                 size="icon"
                 className="h-9 w-9 shrink-0 rounded-none border-expired/40 text-expired"
-                aria-label="确认删除"
+                aria-label={`删除${item.name}`}
                 onClick={() => {
                   deleteItem(item.id);
                   toast.success("已删除");
@@ -226,30 +237,7 @@ function ExpiringRow({ item, canDelete = true }: { item: Item; canDelete?: boole
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 shrink-0 rounded-none text-muted-foreground"
-                aria-label="退出编辑"
-                onClick={() => setEditing(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 shrink-0 rounded-none text-muted-foreground"
-              aria-label="编辑"
-              onClick={() => setEditing(true)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          )}
         </div>
-      ) : (
-        <span aria-hidden="true" className="h-11 w-[5.25rem]" />
       )}
     </div>
   );
