@@ -6,7 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { urgencyOf } from "@/lib/date";
 import type { Item } from "@/lib/types";
-import { CalendarPlus, Trash2 } from "lucide-react";
+import { CalendarPlus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { SignOutButton } from "@/components/SignOutButton";
 import { Button } from "@/components/ui/button";
@@ -199,23 +199,58 @@ function Tab({
 }
 
 function ExpiringRow({ item, canDelete = true }: { item: Item; canDelete?: boolean }) {
+  const [editing, setEditing] = useState(false);
+
   return (
-    <div className="hair-b grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-2">
+    <div
+      className={`hair-b grid grid-cols-[minmax(0,1fr)_5.25rem] items-center gap-1 transition ${
+        editing ? "bg-foreground/[0.06]" : ""
+      }`}
+    >
       <div className="min-w-0">
         <ItemCard item={item} />
       </div>
-      {canDelete ? <Button
-        variant="outline"
-        size="icon"
-        className="h-11 w-11 shrink-0 rounded-none text-muted-foreground"
-        aria-label="删除"
-        onClick={() => {
-          deleteItem(item.id);
-          toast.success("已删除");
-        }}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button> : <span aria-hidden="true" className="h-11 w-11" />}
+      {canDelete ? (
+        <div className="flex h-11 w-[5.25rem] shrink-0 items-center justify-end gap-2">
+          {editing ? (
+            <>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 shrink-0 rounded-none border-expired/40 text-expired"
+                aria-label="确认删除"
+                onClick={() => {
+                  deleteItem(item.id);
+                  toast.success("已删除");
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 shrink-0 rounded-none text-muted-foreground"
+                aria-label="退出编辑"
+                onClick={() => setEditing(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 shrink-0 rounded-none text-muted-foreground"
+              aria-label="编辑"
+              onClick={() => setEditing(true)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      ) : (
+        <span aria-hidden="true" className="h-11 w-[5.25rem]" />
+      )}
     </div>
   );
 }
