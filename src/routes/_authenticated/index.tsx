@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Bell } from "lucide-react";
 import { useState } from "react";
 import { useItems, deleteItem } from "@/lib/useItems";
 import { ItemCard } from "@/components/ItemCard";
@@ -59,7 +60,18 @@ function Index() {
       <PageHeader
         title="保质期记录"
         kicker={`EXPIRY LEDGER · ${dateline}`}
-        right={<SignOutButton />}
+        right={
+          <div className="flex items-center gap-2">
+            <Link
+              to="/reminders"
+              aria-label="到期提醒设置"
+              className="flex h-9 w-9 items-center justify-center border-2 border-foreground text-foreground transition active:bg-muted"
+            >
+              <Bell className="h-4 w-4" />
+            </Link>
+            <SignOutButton />
+          </div>
+        }
       />
 
       <main className="mx-auto max-w-md px-5">
