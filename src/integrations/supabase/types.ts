@@ -50,6 +50,78 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_log: {
+        Row: {
+          expiry_date: string
+          item_id: string
+          sent_at: string
+        }
+        Insert: {
+          expiry_date: string
+          item_id: string
+          sent_at?: string
+        }
+        Update: {
+          expiry_date?: string
+          item_id?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
+      notification_settings: {
+        Row: {
+          days_before: number
+          enabled: boolean
+          remind_hour: number
+          tz_offset_minutes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          days_before?: number
+          enabled?: boolean
+          remind_hour?: number
+          tz_offset_minutes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          days_before?: number
+          enabled?: boolean
+          remind_hour?: number
+          tz_offset_minutes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
