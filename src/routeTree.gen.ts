@@ -14,9 +14,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAddRouteImport } from './routes/_authenticated/add'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
+import { Route as AuthenticatedRemindersRouteImport } from './routes/_authenticated/reminders'
 import { Route as ApiCalendarRouteImport } from './routes/api/calendar'
 import { Route as ApiVoiceAddRouteImport } from './routes/api/voice-add'
 import { Route as AuthenticatedItemIdRouteImport } from './routes/_authenticated/item.$id'
+import { Route as ApiPublicJobsSendRemindersRouteImport } from './routes/api/public/jobs/send-reminders'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -42,6 +44,11 @@ const AuthenticatedArchiveRoute = AuthenticatedArchiveRouteImport.update({
   path: '/archive',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRemindersRoute = AuthenticatedRemindersRouteImport.update({
+  id: '/reminders',
+  path: '/reminders',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiCalendarRoute = ApiCalendarRouteImport.update({
   id: '/api/calendar',
   path: '/api/calendar',
@@ -57,24 +64,34 @@ const AuthenticatedItemIdRoute = AuthenticatedItemIdRouteImport.update({
   path: '/item/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicJobsSendRemindersRoute =
+  ApiPublicJobsSendRemindersRouteImport.update({
+    id: '/api/public/jobs/send-reminders',
+    path: '/api/public/jobs/send-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/add': typeof AuthenticatedAddRoute
   '/archive': typeof AuthenticatedArchiveRoute
+  '/reminders': typeof AuthenticatedRemindersRoute
   '/api/calendar': typeof ApiCalendarRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
   '/item/$id': typeof AuthenticatedItemIdRoute
+  '/api/public/jobs/send-reminders': typeof ApiPublicJobsSendRemindersRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/add': typeof AuthenticatedAddRoute
   '/archive': typeof AuthenticatedArchiveRoute
+  '/reminders': typeof AuthenticatedRemindersRoute
   '/api/calendar': typeof ApiCalendarRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
   '/': typeof AuthenticatedIndexRoute
   '/item/$id': typeof AuthenticatedItemIdRoute
+  '/api/public/jobs/send-reminders': typeof ApiPublicJobsSendRemindersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -82,10 +99,12 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/add': typeof AuthenticatedAddRoute
   '/_authenticated/archive': typeof AuthenticatedArchiveRoute
+  '/_authenticated/reminders': typeof AuthenticatedRemindersRoute
   '/api/calendar': typeof ApiCalendarRoute
   '/api/voice-add': typeof ApiVoiceAddRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/item/$id': typeof AuthenticatedItemIdRoute
+  '/api/public/jobs/send-reminders': typeof ApiPublicJobsSendRemindersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -94,28 +113,34 @@ export interface FileRouteTypes {
     | '/auth'
     | '/add'
     | '/archive'
+    | '/reminders'
     | '/api/calendar'
     | '/api/voice-add'
     | '/item/$id'
+    | '/api/public/jobs/send-reminders'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
     | '/add'
     | '/archive'
+    | '/reminders'
     | '/api/calendar'
     | '/api/voice-add'
     | '/'
     | '/item/$id'
+    | '/api/public/jobs/send-reminders'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/add'
     | '/_authenticated/archive'
+    | '/_authenticated/reminders'
     | '/api/calendar'
     | '/api/voice-add'
     | '/_authenticated/'
     | '/_authenticated/item/$id'
+    | '/api/public/jobs/send-reminders'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -123,6 +148,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ApiCalendarRoute: typeof ApiCalendarRoute
   ApiVoiceAddRoute: typeof ApiVoiceAddRoute
+  ApiPublicJobsSendRemindersRoute: typeof ApiPublicJobsSendRemindersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -162,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedArchiveRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reminders': {
+      id: '/_authenticated/reminders'
+      path: '/reminders'
+      fullPath: '/reminders'
+      preLoaderRoute: typeof AuthenticatedRemindersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/calendar': {
       id: '/api/calendar'
       path: '/api/calendar'
@@ -183,12 +216,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedItemIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/jobs/send-reminders': {
+      id: '/api/public/jobs/send-reminders'
+      path: '/api/public/jobs/send-reminders'
+      fullPath: '/api/public/jobs/send-reminders'
+      preLoaderRoute: typeof ApiPublicJobsSendRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAddRoute: typeof AuthenticatedAddRoute
   AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRoute
+  AuthenticatedRemindersRoute: typeof AuthenticatedRemindersRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedItemIdRoute: typeof AuthenticatedItemIdRoute
 }
@@ -196,6 +237,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAddRoute: AuthenticatedAddRoute,
   AuthenticatedArchiveRoute: AuthenticatedArchiveRoute,
+  AuthenticatedRemindersRoute: AuthenticatedRemindersRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedItemIdRoute: AuthenticatedItemIdRoute,
 }
@@ -208,6 +250,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ApiCalendarRoute: ApiCalendarRoute,
   ApiVoiceAddRoute: ApiVoiceAddRoute,
+  ApiPublicJobsSendRemindersRoute: ApiPublicJobsSendRemindersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
