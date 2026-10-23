@@ -263,7 +263,7 @@ function AuthPage() {
 
               <button
                 type="submit"
-                disabled={busy || googleBusy}
+                disabled={busy || !!googleBusy}
                 className="min-h-12 border-2 border-foreground bg-foreground text-background transition active:opacity-80 disabled:opacity-50"
               >
                 <span className="label-kicker">
@@ -278,7 +278,7 @@ function AuthPage() {
 
             <button
               onClick={() => handleOAuth("apple")}
-              disabled={busy || googleBusy}
+              disabled={busy || !!googleBusy}
               className="mt-3 min-h-12 border-2 border-foreground bg-foreground text-background transition active:opacity-80 disabled:opacity-50"
             >
               <span className="label-kicker">
@@ -288,7 +288,7 @@ function AuthPage() {
 
             <button
               onClick={() => handleOAuth("google")}
-              disabled={busy || googleBusy}
+              disabled={busy || !!googleBusy}
               className="mt-3 min-h-12 border-2 border-foreground text-foreground transition active:bg-muted disabled:opacity-50"
             >
               <span className="label-kicker">
