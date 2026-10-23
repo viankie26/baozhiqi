@@ -1,0 +1,12 @@
+{
+  "appId": "com.viankie.baozhiqi",
+  "appName": "保质期记录",
+  "webDir": "ios-shell",
+  "server": {
+    "url": "https://baozhiqi.lovable.app",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "always"
+  }
+}
