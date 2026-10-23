@@ -282,7 +282,7 @@ function AuthPage() {
               className="mt-3 min-h-12 border-2 border-foreground bg-foreground text-background transition active:opacity-80 disabled:opacity-50"
             >
               <span className="label-kicker">
-                {googleBusy === "apple" ? "正在打开苹果登录…" : " 通过 Apple 登录 / APPLE"}
+                {googleBusy === "apple" ? "正在打开苹果登录…" : "通过 Apple 登录 / APPLE"}
               </span>
             </button>
 
