@@ -63,7 +63,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [busy, setBusy] = useState(false);
-  const [googleBusy, setGoogleBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState<false | "google" | "apple">(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
   // 反机器人：蜜罐字段 + 最短填写时间 + 算术验证 + 本机冷却
   const [honeypot, setHoneypot] = useState("");
@@ -167,21 +167,22 @@ function AuthPage() {
   }
 
 
-  async function handleGoogle() {
+  async function handleOAuth(provider: "google" | "apple") {
     if (googleBusy) return;
-    setGoogleBusy(true);
+    setGoogleBusy(provider);
+    const label = provider === "apple" ? "苹果" : "谷歌";
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        toast.error("谷歌登录失败，请重试");
+        toast.error(`${label}登录失败，请重试`);
         setGoogleBusy(false);
         return;
       }
       // 已登录或即将跳转：保持按钮 loading，交给 onAuthStateChange 直接进入主页
     } catch {
-      toast.error("谷歌登录失败，请重试");
+      toast.error(`${label}登录失败，请重试`);
       setGoogleBusy(false);
     }
   }
@@ -276,12 +277,22 @@ function AuthPage() {
             </form>
 
             <button
-              onClick={handleGoogle}
+              onClick={() => handleOAuth("apple")}
+              disabled={busy || googleBusy}
+              className="mt-3 min-h-12 border-2 border-foreground bg-foreground text-background transition active:opacity-80 disabled:opacity-50"
+            >
+              <span className="label-kicker">
+                {googleBusy === "apple" ? "正在打开苹果登录…" : " 通过 Apple 登录 / APPLE"}
+              </span>
+            </button>
+
+            <button
+              onClick={() => handleOAuth("google")}
               disabled={busy || googleBusy}
               className="mt-3 min-h-12 border-2 border-foreground text-foreground transition active:bg-muted disabled:opacity-50"
             >
               <span className="label-kicker">
-                {googleBusy ? "正在打开谷歌登录…" : "用谷歌账号继续 / GOOGLE"}
+                {googleBusy === "google" ? "正在打开谷歌登录…" : "用谷歌账号继续 / GOOGLE"}
               </span>
             </button>
 
