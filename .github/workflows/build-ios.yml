@@ -1,0 +1,77 @@
+name: Build iOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Capacitor
+        run: npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/ios@7
+
+      - name: Create iOS project
+        run: |
+          npx cap add ios
+          npx cap sync ios
+          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 用于通过语音快速添加保质期物品" ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string 用于识别语音中的物品名称和日期" ios/App/App/Info.plist || true
+
+      - name: Install signing certificate and profile
+        env:
+          P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
+          PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+        run: |
+          KEYCHAIN=$RUNNER_TEMP/build.keychain
+          echo "$P12_BASE64" | base64 --decode > $RUNNER_TEMP/cert.p12
+          security create-keychain -p temp $KEYCHAIN
+          security set-keychain-settings -lut 21600 $KEYCHAIN
+          security unlock-keychain -p temp $KEYCHAIN
+          security import $RUNNER_TEMP/cert.p12 -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN
+          security set-key-partition-list -S apple-tool:,apple: -k temp $KEYCHAIN
+          security list-keychain -d user -s $KEYCHAIN
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+
+      - name: Build and export ipa
+        env:
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+          PROFILE_NAME: ${{ secrets.IOS_PROFILE_NAME }}
+        run: |
+          cat > $RUNNER_TEMP/export.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>provisioningProfiles</key><dict><key>com.viankie.baozhiqi</key><string>$PROFILE_NAME</string></dict>
+          </dict></plist>
+          EOF
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -archivePath $RUNNER_TEMP/App.xcarchive -destination 'generic/platform=iOS' \
+            CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=$TEAM_ID \
+            CODE_SIGN_IDENTITY="Apple Distribution" PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" archive
+          xcodebuild -exportArchive -archivePath $RUNNER_TEMP/App.xcarchive \
+            -exportOptionsPlist $RUNNER_TEMP/export.plist -exportPath $RUNNER_TEMP/out
+
+      - name: Upload to App Store Connect
+        env:
+          API_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          API_ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+          API_KEY_BASE64: ${{ secrets.ASC_KEY_BASE64 }}
+        run: |
+          mkdir -p ~/private_keys
+          echo "$API_KEY_BASE64" | base64 --decode > ~/private_keys/AuthKey_$API_KEY_ID.p8
+          xcrun altool --upload-app -f $RUNNER_TEMP/out/*.ipa -t ios --apiKey $API_KEY_ID --apiIssuer $API_ISSUER
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ipa
+          path: ${{ runner.temp }}/out/*.ipa
