@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -294,6 +294,10 @@ function AuthPage() {
             >
               {mode === "signin" ? "还没有账号？去注册" : "已有账号？去登录"}
             </button>
+            <p className="mt-6 text-xs text-muted-foreground">
+              登录或注册即表示你已阅读并同意
+              <Link to="/privacy" className="underline underline-offset-4">《隐私政策》</Link>
+            </p>
           </>
         )}
       </div>

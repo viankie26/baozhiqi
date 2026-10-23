@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -151,6 +152,14 @@ function RemindersPage() {
         <p className="text-[0.8125rem] text-muted-foreground">
           每件物品只提醒一次：在到期前 {daysBefore} 天内的每天 {String(hour).padStart(2, "0")}:00 左右检查，有新进入提醒范围的物品就通知你。
         </p>
+
+        <div className="mt-6 flex flex-col gap-3 border-t border-border pt-6 pb-24">
+          <span className="label-kicker text-muted-foreground">账号 / ACCOUNT</span>
+          <Link to="/privacy" className="text-sm text-muted-foreground underline underline-offset-4">
+            查看隐私政策
+          </Link>
+          <DeleteAccountButton />
+        </div>
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-foreground bg-warm-bg px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4">
