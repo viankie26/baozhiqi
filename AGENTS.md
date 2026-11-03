@@ -12,3 +12,4 @@
 - Keep single and batch calendar export on the same pure ICS serializer so dates, alarms, and escaping stay consistent.
 - Batch calendar exports POST caller-supplied records to the same-origin formatter; it must not read account data, persist exports, or put batch names/notes in URLs.
 - Expiry push reminders: per-user settings in the database; an hourly managed schedule calls /api/public/jobs/send-reminders, which matches each user's local hour and logs (item, expiry date) so each item is notified once. Push-only service worker at /push-sw.js (no caching).
+- iOS app is a Capacitor shell (capacitor.config.json, ios-shell/) loading the published site via server.url, built and uploaded by .github/workflows/build-ios.yml; keeps one codebase because the app is SSR and has no static export.
