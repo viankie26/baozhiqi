@@ -1,13 +1,32 @@
-import { CATEGORY_LABEL, type Item } from "./types";
+import { categoryLabel, type Item } from "./types";
+import type { Lang } from "./i18n";
 
 export type CalendarEntry = { id?: string | undefined; name: string; date: string; category?: string | undefined; note?: string | undefined };
 
-export function calendarEntries(items: Item[]): CalendarEntry[] {
+/** ICS text snippets per language — one serializer, bilingual output. */
+const CAL_STRINGS = {
+  zh: {
+    summary: (name: string) => `[到期提醒] ${name}`,
+    category: (cat: string) => `分类：${cat}`,
+    note: (note: string) => `备注：${note}`,
+    alarmTomorrow: (name: string) => `${name} 明天到期`,
+    alarmToday: (name: string) => `${name} 今天到期`,
+  },
+  en: {
+    summary: (name: string) => `[Expiry] ${name}`,
+    category: (cat: string) => `Category: ${cat}`,
+    note: (note: string) => `Note: ${note}`,
+    alarmTomorrow: (name: string) => `${name} expires tomorrow`,
+    alarmToday: (name: string) => `${name} expires today`,
+  },
+} as const;
+
+export function calendarEntries(items: Item[], lang: Lang = "zh"): CalendarEntry[] {
   return items.filter((item) => !item.usedUp).map((item) => ({
     id: item.id,
     name: item.name,
     date: item.expiryDate,
-    category: CATEGORY_LABEL[item.category],
+    category: categoryLabel(item.category, lang),
     note: item.note,
   }));
 }
@@ -45,22 +64,23 @@ function foldLine(line: string): string {
   return result;
 }
 
-export function buildCalendar(entries: CalendarEntry[], now = new Date()): string {
+export function buildCalendar(entries: CalendarEntry[], now = new Date(), lang: Lang = "zh"): string {
+  const s = CAL_STRINGS[lang];
   const stamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Expiry Ledger//CN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Minipiry//CN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
   for (const entry of entries) {
     if (!validCalendarDate(entry.date)) throw new Error("Invalid expiry date");
-    const description = [entry.category ? `分类：${entry.category}` : "", entry.note ? `备注：${entry.note}` : ""].filter(Boolean).join("\n");
+    const description = [entry.category ? s.category(entry.category) : "", entry.note ? s.note(entry.note) : ""].filter(Boolean).join("\n");
     lines.push(
       "BEGIN:VEVENT",
-      `UID:${entry.id ?? crypto.randomUUID()}@expiry-ledger`,
+      `UID:${entry.id ?? crypto.randomUUID()}@minipiry`,
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${calendarDate(entry.date)}`,
       `DTEND;VALUE=DATE:${calendarDate(entry.date, 1)}`,
-      `SUMMARY:${escapeText(`[到期提醒] ${entry.name}`)}`,
+      `SUMMARY:${escapeText(s.summary(entry.name))}`,
       `DESCRIPTION:${escapeText(description)}`,
-      "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${escapeText(`${entry.name} 明天到期`)}`, "TRIGGER:-PT15H", "END:VALARM",
-      "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${escapeText(`${entry.name} 今天到期`)}`, "TRIGGER:PT9H", "END:VALARM",
+      "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${escapeText(s.alarmTomorrow(entry.name))}`, "TRIGGER:-PT15H", "END:VALARM",
+      "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${escapeText(s.alarmToday(entry.name))}`, "TRIGGER:PT9H", "END:VALARM",
       "END:VEVENT",
     );
   }

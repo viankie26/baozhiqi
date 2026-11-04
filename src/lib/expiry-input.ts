@@ -36,14 +36,14 @@ export function composeExpiryDate(
 export type DatePresetId = "3d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y";
 
 /** Quick-fill pills shown under the date fields, in tap order. */
-export const DATE_PRESETS: { id: DatePresetId; label: string }[] = [
-  { id: "3d", label: "3天后" },
-  { id: "1w", label: "1周后" },
-  { id: "2w", label: "半个月" },
-  { id: "1m", label: "1个月" },
-  { id: "3m", label: "3个月" },
-  { id: "6m", label: "6个月" },
-  { id: "1y", label: "1年" },
+export const DATE_PRESETS: { id: DatePresetId; zh: string; en: string }[] = [
+  { id: "3d", zh: "3天后", en: "3 days" },
+  { id: "1w", zh: "1周后", en: "1 week" },
+  { id: "2w", zh: "半个月", en: "2 weeks" },
+  { id: "1m", zh: "1个月", en: "1 month" },
+  { id: "3m", zh: "3个月", en: "3 months" },
+  { id: "6m", zh: "6个月", en: "6 months" },
+  { id: "1y", zh: "1年", en: "1 year" },
 ];
 
 /** Expiry date a preset lands on, counted from today on the device (local time). */

@@ -34,8 +34,16 @@ export function progressOf(item: Item, now: Date = new Date()): number {
 
 const ZH_WEEK = ["日", "一", "二", "三", "四", "五", "六"];
 
-export function formatDate(expiryDate: string): string {
+export function formatDate(expiryDate: string, lang: "zh" | "en" = "zh"): string {
   const d = new Date(expiryDate + "T00:00:00");
+  if (lang === "en") {
+    return d.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 周${ZH_WEEK[d.getDay()]}`;
 }
 

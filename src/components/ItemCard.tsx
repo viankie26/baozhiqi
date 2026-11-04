@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { CATEGORY_LABEL, type Item } from "@/lib/types";
+import { categoryLabel, type Item } from "@/lib/types";
 import { daysUntil, formatDate, urgencyOf, type Urgency } from "@/lib/date";
+import { useLang } from "@/lib/i18n";
 
 const tone: Record<Urgency, string> = {
   expired: "text-expired",
@@ -21,6 +22,7 @@ const statusLabel: Record<Urgency, string> = {
 };
 
 export function ItemCard({ item, muted }: { item: Item; muted?: boolean }) {
+  const { lang, t } = useLang();
   const urgency = urgencyOf(item);
   const days = daysUntil(item.expiryDate);
 
@@ -40,14 +42,14 @@ export function ItemCard({ item, muted }: { item: Item; muted?: boolean }) {
             {statusLabel[urgency]}
           </span>
           <span className="label-kicker truncate text-muted-foreground">
-            {CATEGORY_LABEL[item.category]}
+            {categoryLabel(item.category, lang)}
           </span>
         </div>
         <p className="font-display mt-2 truncate text-[1.25rem] leading-none text-foreground">
           {item.name}
         </p>
         <p className="mt-1.5 truncate text-[0.8125rem] text-muted-foreground">
-          {formatDate(item.expiryDate)}
+          {formatDate(item.expiryDate, lang)}
           {item.note ? ` — ${item.note}` : ""}
         </p>
       </div>
@@ -59,7 +61,7 @@ export function ItemCard({ item, muted }: { item: Item; muted?: boolean }) {
           {Math.abs(days)}
         </span>
         <span className="label-kicker mt-1 block text-muted-foreground">
-          {days < 0 ? "DAYS OVER" : days === 0 ? "TODAY" : "DAYS LEFT"}
+          {days < 0 ? t.card.daysOver : days === 0 ? t.card.today : t.card.daysLeft}
         </span>
       </div>
     </Link>

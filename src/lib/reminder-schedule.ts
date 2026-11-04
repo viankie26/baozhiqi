@@ -40,6 +40,7 @@ export function reminderWindow(nowMs: number, s: ReminderSettings) {
   return { from: today, to: addDaysIso(today, s.daysBefore), today };
 }
 
-export function daysLabel(n: number): string {
+export function daysLabel(n: number, lang: "zh" | "en" = "zh"): string {
+  if (lang === "en") return n === 0 ? "Same day" : `${n}d before`;
   return n === 0 ? "当天" : `提前 ${n} 天`;
 }

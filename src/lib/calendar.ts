@@ -1,8 +1,9 @@
-import { CATEGORY_LABEL, type Item } from "./types";
+import { categoryLabel, type Item } from "./types";
 import { calendarEntries } from "./calendar-data";
+import { currentLang } from "./i18n";
 
 export function addAllToCalendar(items: Item[]): number {
-  const entries = calendarEntries(items);
+  const entries = calendarEntries(items, currentLang());
   if (entries.length === 0) return 0;
   // POST keeps names/notes out of the URL and avoids URL length limits.
   const form = document.createElement("form");
@@ -25,7 +26,7 @@ export function addToCalendar(item: Item) {
   const params = new URLSearchParams({
     name: item.name,
     date: item.expiryDate,
-    category: CATEGORY_LABEL[item.category],
+    category: categoryLabel(item.category, currentLang()),
   });
   if (item.note) params.set("note", item.note);
   window.location.href = `/api/calendar?${params.toString()}`;
