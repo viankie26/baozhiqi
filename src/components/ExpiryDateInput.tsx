@@ -1,3 +1,5 @@
+import { useLang } from "@/lib/i18n";
+import { zhCN, enUS } from "date-fns/locale";
 import { useEffect, useRef, useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -21,6 +23,7 @@ export function ExpiryDateInput({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { t, lang } = useLang();
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");
@@ -62,7 +65,7 @@ export function ExpiryDateInput({
   return (
     <div>
       <div className="flex items-end gap-5">
-        <SegField label="年" hint="后两位">
+        <SegField label={t.dateInput.year} hint={t.dateInput.yearHintShort}>
           <input
             className={segInput}
             inputMode="numeric"
@@ -73,7 +76,7 @@ export function ExpiryDateInput({
             onChange={(e) => update({ year: e.target.value.replace(/\D/g, "") })}
           />
         </SegField>
-        <SegField label="月">
+        <SegField label={t.dateInput.month}>
           <input
             className={segInput}
             inputMode="numeric"
@@ -84,7 +87,7 @@ export function ExpiryDateInput({
             onChange={(e) => update({ month: e.target.value.replace(/\D/g, "") })}
           />
         </SegField>
-        <SegField label="日">
+        <SegField label={t.dateInput.day}>
           <input
             className={segInput}
             inputMode="numeric"
@@ -100,7 +103,7 @@ export function ExpiryDateInput({
           <PopoverTrigger asChild>
             <button
               type="button"
-              aria-label="打开日历选择完整日期"
+              aria-label={t.dateInput.openCal}
               className="mb-1.5 ml-auto flex h-11 w-11 shrink-0 items-center justify-center border-2 border-foreground text-foreground transition active:bg-muted"
             >
               <CalendarIcon className="h-4 w-4" />
@@ -108,6 +111,7 @@ export function ExpiryDateInput({
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="end">
             <Calendar
+              locale={lang === "zh" ? zhCN : enUS}
               mode="single"
               selected={value ? new Date(`${value}T00:00:00`) : undefined}
               {...(value ? { defaultMonth: new Date(`${value}T00:00:00`) } : {})}
@@ -131,7 +135,7 @@ export function ExpiryDateInput({
             <button
               key={preset.id}
               type="button"
-              aria-label={`过期日期设为${preset.label}`}
+              aria-label={t.dateInput.presetAria(preset[lang])}
               onClick={() => applyIso(target)}
               className={`label-kicker min-h-11 border px-3.5 transition active:opacity-70 ${
                 active
@@ -139,16 +143,16 @@ export function ExpiryDateInput({
                   : "border-border text-muted-foreground"
               }`}
             >
-              {preset.label}
+              {preset[lang]}
             </button>
           );
         })}
       </div>
 
       {value ? (
-        <p className="label-kicker mt-3 text-muted-foreground">{formatDate(value)}</p>
+        <p className="label-kicker mt-3 text-muted-foreground">{formatDate(value, lang)}</p>
       ) : (
-        <p className="label-kicker mt-3 text-muted-foreground">年填后两位即可，如 26 = 2026</p>
+        <p className="label-kicker mt-3 text-muted-foreground">{t.dateInput.yearHint}</p>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import { useLang } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,9 +13,9 @@ import { daysUntil, formatDate, urgencyOf } from "@/lib/date";
 export const Route = createFileRoute("/_authenticated/item/$id")({
   head: () => ({
     meta: [
-      { title: "物品详情 · 保质期记录" },
+      { title: "物品详情 · Minipiry · 超简到期" },
       { name: "description", content: "查看和编辑物品的保质期、分类与备注。" },
-      { property: "og:title", content: "物品详情 · 保质期记录" },
+      { property: "og:title", content: "物品详情 · Minipiry · 超简到期" },
       {
         property: "og:description",
         content: "查看和编辑物品的保质期、分类与备注。",
@@ -30,6 +31,7 @@ const inputClass =
   "w-full border-b-2 border-foreground bg-transparent px-0 py-2.5 text-[1.0625rem] text-foreground outline-none placeholder:text-muted-foreground focus:border-expired";
 
 function ItemDetailPage() {
+  const { t, lang } = useLang();
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const item = useItemById(id);
@@ -41,12 +43,12 @@ function ItemDetailPage() {
   if (!item) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-warm-bg px-6 text-center">
-        <p className="font-display text-[1.5rem] text-foreground">物品不存在</p>
+        <p className="font-display text-[1.5rem] text-foreground">{t.detail.notFound}</p>
         <button
           onClick={() => navigate({ to: "/" })}
           className="label-kicker bg-foreground px-5 py-3 text-background"
         >
-          返回首页
+          {t.detail.backHome}
         </button>
       </div>
     );
@@ -63,11 +65,11 @@ function ItemDetailPage() {
 
   function handleSave() {
     if (!name.trim()) {
-      toast.error("请填写名称");
+      toast.error(t.detail.needName);
       return;
     }
     if (!expiryDate) {
-      toast.error("请选择日期");
+      toast.error(t.detail.needDate);
       return;
     }
     updateItem(id, {
@@ -76,25 +78,25 @@ function ItemDetailPage() {
       expiryDate,
       ...(note.trim() ? { note: note.trim() } : {}),
     });
-    toast.success("已更新");
+    toast.success(t.detail.updated);
     navigate({ to: "/" });
   }
 
   function handleDelete() {
     deleteItem(id);
-    toast.success("已删除");
+    toast.success(t.detail.deleted);
     navigate({ to: "/" });
   }
 
   function handleUsedUp() {
     updateItem(id, { usedUp: true });
-    toast.success("已标记为用完");
+    toast.success(t.detail.markedUsed);
     navigate({ to: "/archive" });
   }
 
   return (
     <div className="min-h-screen bg-warm-bg pb-36">
-      <PageHeader title={item.name} kicker="ITEM RECORD" back />
+      <PageHeader title={item.name} kicker={t.detail.kicker} back />
 
       <main className="mx-auto max-w-md px-5">
         <div className="grid grid-cols-[auto_minmax(0,1fr)] items-end gap-4 border-b-2 border-foreground py-5">
@@ -102,31 +104,31 @@ function ItemDetailPage() {
             {Math.abs(days)}
           </span>
           <span className="label-kicker pb-2 text-muted-foreground">
-            {days < 0 ? "天前过期 / OVERDUE" : days === 0 ? "今天到期 / TODAY" : "天后到期 / LEFT"}
+            {days < 0 ? t.detail.daysOver : days === 0 ? t.detail.todayExp : t.detail.daysLeft}
             <br />
-            {formatDate(item.expiryDate)}
+            {formatDate(item.expiryDate, lang)}
           </span>
         </div>
 
         <button
           onClick={() => {
             addToCalendar(item);
-            toast.success("已生成日历提醒，请在弹窗中添加");
+            toast.success(t.detail.calReady);
           }}
           className="label-kicker mt-4 flex w-full items-center justify-center gap-1.5 border-2 border-foreground py-3 text-foreground transition active:bg-muted"
         >
-          <CalendarPlus className="h-3.5 w-3.5" /> 同步到系统日历 / CALENDAR
+          <CalendarPlus className="h-3.5 w-3.5" /> {t.detail.syncCal}
         </button>
 
         <div className="flex flex-col gap-6 pt-7">
-          <Field label="物品名称 / NAME">
+          <Field label={t.detail.fieldName}>
             <input
               className={inputClass}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </Field>
-          <Field label="分类 / CATEGORY">
+          <Field label={t.detail.fieldCategory}>
             <div className="grid grid-cols-4 border border-border">
               {CATEGORIES.map((c, i) => (
                 <button
@@ -138,20 +140,20 @@ function ItemDetailPage() {
                       : "text-muted-foreground"
                   }`}
                 >
-                  {c.label}
+                  {c[lang]}
                 </button>
               ))}
             </div>
           </Field>
-          <Field label="过期日期 / EXPIRY">
+          <Field label={t.detail.fieldExpiry}>
             <ExpiryDateInput value={expiryDate} onChange={setExpiryDate} />
           </Field>
-          <Field label="备注 / NOTE">
+          <Field label={t.detail.fieldNote}>
             <input
               className={inputClass}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="数量、存放位置等"
+              placeholder={t.detail.notePh}
             />
           </Field>
         </div>
@@ -163,18 +165,18 @@ function ItemDetailPage() {
             onClick={handleUsedUp}
             className="label-kicker flex flex-1 items-center justify-center gap-1.5 border-2 border-foreground py-3.5 text-foreground transition active:bg-muted"
           >
-            <CheckCircle2 className="h-3.5 w-3.5" /> 用完
+            <CheckCircle2 className="h-3.5 w-3.5" /> {t.detail.usedUp}
           </button>
           <button
             onClick={handleSave}
             className="label-kicker flex-[1.4] bg-foreground py-3.5 text-background transition active:opacity-80"
           >
-            保存 / SAVE
+            {t.detail.save}
           </button>
           <button
             onClick={handleDelete}
             className="flex min-h-11 items-center justify-center border-2 border-foreground px-4 text-foreground transition active:bg-muted"
-            aria-label="删除"
+            aria-label={t.detail.deleteAria}
           >
             <Trash2 className="h-4 w-4" />
           </button>

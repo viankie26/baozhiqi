@@ -8,6 +8,13 @@
       "when": 1792681395932,
       "tag": "0000_push_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793775521843,
+      "tag": "0001_notification_language",
+      "breakpoints": true
     }
   ]
 }

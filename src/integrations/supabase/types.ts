@@ -72,6 +72,7 @@ export type Database = {
         Row: {
           days_before: number
           enabled: boolean
+          language: string
           remind_hour: number
           tz_offset_minutes: number
           updated_at: string
@@ -80,6 +81,7 @@ export type Database = {
         Insert: {
           days_before?: number
           enabled?: boolean
+          language?: string
           remind_hour?: number
           tz_offset_minutes?: number
           updated_at?: string
@@ -88,6 +90,7 @@ export type Database = {
         Update: {
           days_before?: number
           enabled?: boolean
+          language?: string
           remind_hour?: number
           tz_offset_minutes?: number
           updated_at?: string

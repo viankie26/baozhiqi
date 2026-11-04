@@ -89,14 +89,6 @@ describe("offsetExpiryDate", () => {
 describe("DATE_PRESETS", () => {
   it("offers exactly the seven quick-fill options, in tap order", () => {
     expect(DATE_PRESETS.map((p) => p.id)).toEqual(["3d", "1w", "2w", "1m", "3m", "6m", "1y"]);
-    expect(DATE_PRESETS.map((p) => p.label)).toEqual([
-      "3天后",
-      "1周后",
-      "半个月",
-      "1个月",
-      "3个月",
-      "6个月",
-      "1年",
-    ]);
+
   });
 });

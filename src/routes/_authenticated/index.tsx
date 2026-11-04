@@ -1,3 +1,4 @@
+import { useLang } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bell } from "lucide-react";
 import { useState } from "react";
@@ -16,12 +17,12 @@ import { addAllToCalendar } from "@/lib/calendar";
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
-      { title: "保质期记录 · 家中物品到期一目了然" },
+      { title: "Minipiry · 超简到期 · 家中物品到期一目了然" },
       {
         name: "description",
         content: "简便记录物品保质期，支持语音添加，到期自动提醒。",
       },
-      { property: "og:title", content: "保质期记录 · 家中物品到期一目了然" },
+      { property: "og:title", content: "Minipiry · 超简到期 · 家中物品到期一目了然" },
       {
         property: "og:description",
         content: "简便记录物品保质期，支持语音添加，到期自动提醒。",
@@ -36,6 +37,7 @@ export const Route = createFileRoute("/_authenticated/")({
 type Filter = "all" | "soon" | "expired";
 
 function Index() {
+  const { t } = useLang();
   const items = useItems();
   const [filter, setFilter] = useState<Filter>("all");
   const [editing, setEditing] = useState(false);
@@ -58,13 +60,13 @@ function Index() {
   return (
     <div className="min-h-screen bg-warm-bg pb-32">
       <PageHeader
-        title="保质期记录"
-        kicker={`EXPIRY LEDGER · ${dateline}`}
+        title={t.home.title}
+        kicker={`MINIPIRY · ${dateline}`}
         right={
           <div className="flex items-center gap-2">
             <Link
               to="/reminders"
-              aria-label="到期提醒设置"
+              aria-label={t.home.bellAria}
               className="flex h-9 w-9 items-center justify-center border-2 border-foreground text-foreground transition active:bg-muted"
             >
               <Bell className="h-4 w-4" />
@@ -77,15 +79,15 @@ function Index() {
       <main className="mx-auto max-w-md px-5">
         {/* Numbers strip */}
         <section className="animate-rise grid grid-cols-3 border-b-2 border-foreground">
-          <Stat label="在库 STOCK" value={active.length} tone="text-foreground" />
+          <Stat label={t.home.statStock} value={active.length} tone="text-foreground" />
           <Stat
-            label="临期 SOON"
+            label={t.home.statSoon}
             value={soon.length}
             tone="text-soon"
             divider
           />
           <Stat
-            label="过期 OVER"
+            label={t.home.statOver}
             value={expired.length}
             tone="text-expired"
             divider
@@ -94,7 +96,7 @@ function Index() {
 
         {alertCount > 0 && (
           <p className="label-kicker bg-foreground px-3 py-2.5 text-background">
-            ⚠ {alertCount} 件需要处理
+            {t.home.alertNeed(alertCount)}
           </p>
         )}
 
@@ -107,25 +109,25 @@ function Index() {
               try {
                 addAllToCalendar(items);
               } catch {
-                toast.error("日历提醒生成失败，请重试");
+                toast.error(t.home.calFail);
               }
             }}
           >
             <CalendarPlus />
-            全部添加到日历{active.length > 0 ? `（${active.length} 件）` : ""}
+            {t.home.addAll}{active.length > 0 ? t.home.countSuffix(active.length) : ""}
           </Button>
         </div>
 
         {/* Filter tabs */}
         <div className="flex items-center gap-5 border-b border-border py-3">
           <Tab active={filter === "all"} onClick={() => setFilter("all")}>
-            全部
+            {t.home.tabAll}
           </Tab>
           <Tab active={filter === "soon"} onClick={() => setFilter("soon")}>
-            临期 {soon.length}
+            {t.home.tabSoon} {soon.length}
           </Tab>
           <Tab active={filter === "expired"} onClick={() => setFilter("expired")}>
-            过期 {expired.length}
+            {t.home.tabExpired} {expired.length}
           </Tab>
           {active.length > 0 && (
             <Button
@@ -136,7 +138,7 @@ function Index() {
               onClick={() => setEditing((value) => !value)}
             >
               {editing ? <X /> : <Pencil />}
-              {editing ? "完成" : "编辑"}
+              {editing ? t.home.done : t.home.edit}
             </Button>
           )}
         </div>
@@ -146,29 +148,29 @@ function Index() {
         ) : (
           <div className="flex flex-col">
             {showExpired && expired.length > 0 && (
-              <Section title="已过期 / OVERDUE">
+              <Section title={t.home.secOverdue}>
                 {expired.map((it) => (
                   <ExpiringRow key={it.id} item={it} editing={editing} />
                 ))}
               </Section>
             )}
             {showSoon && soon.length > 0 && (
-              <Section title="即将过期 / DUE SOON">
+              <Section title={t.home.secSoon}>
                 {soon.map((it) => (
                   <ExpiringRow key={it.id} item={it} editing={editing} />
                 ))}
               </Section>
             )}
             {showNormal && normal.length > 0 && (
-              <Section title="正常 / IN DATE">
+              <Section title={t.home.secOk}>
                 {normal.map((it) => (
                   <ExpiringRow key={it.id} item={it} editing={editing} />
                 ))}
               </Section>
             )}
-            {filter === "soon" && soon.length === 0 && <NoMatch text="暂无临期物品" />}
+            {filter === "soon" && soon.length === 0 && <NoMatch text={t.home.noSoon} />}
             {filter === "expired" && expired.length === 0 && (
-              <NoMatch text="暂无已过期物品" />
+              <NoMatch text={t.home.noExpired} />
             )}
           </div>
         )}
@@ -224,6 +226,7 @@ function Tab({
 }
 
 function ExpiringRow({ item, editing }: { item: Item; editing: boolean }) {
+  const { t } = useLang();
   return (
     <div
       className={`hair-b grid items-center transition ${
@@ -241,10 +244,10 @@ function ExpiringRow({ item, editing }: { item: Item; editing: boolean }) {
                 variant="outline"
                 size="icon"
                 className="h-9 w-9 shrink-0 rounded-none border-expired/40 text-expired"
-                aria-label={`删除${item.name}`}
+                aria-label={t.home.deleteAria(item.name)}
                 onClick={() => {
                   deleteItem(item.id);
-                  toast.success("已删除");
+                  toast.success(t.home.deleted);
                 }}
               >
                 <Trash2 className="h-4 w-4" />
@@ -271,13 +274,14 @@ function NoMatch({ text }: { text: string }) {
 }
 
 function EmptyState() {
+  const { t } = useLang();
   return (
     <div className="py-20">
       <p className="font-display text-[2rem] leading-tight text-foreground">
-        空 空 如 也
+        {t.home.emptyTitle}
       </p>
       <p className="mt-3 max-w-[18rem] text-sm text-muted-foreground">
-        点击底部的加号，用一句话记录第一件物品的保质期。
+        {t.home.emptyBody}
       </p>
     </div>
   );

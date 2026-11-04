@@ -73,7 +73,7 @@ export function buildCalendar(entries: CalendarEntry[], now = new Date(), lang: 
     const description = [entry.category ? s.category(entry.category) : "", entry.note ? s.note(entry.note) : ""].filter(Boolean).join("\n");
     lines.push(
       "BEGIN:VEVENT",
-      `UID:${entry.id ?? crypto.randomUUID()}@minipiry`,
+      `UID:${entry.id ?? crypto.randomUUID()}@expiry-ledger`,
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${calendarDate(entry.date)}`,
       `DTEND;VALUE=DATE:${calendarDate(entry.date, 1)}`,

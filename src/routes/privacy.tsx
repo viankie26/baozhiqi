@@ -3,10 +3,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "隐私政策 · 保质期记录" },
-      { name: "description", content: "保质期记录应用如何收集、使用和删除你的数据。" },
-      { property: "og:title", content: "隐私政策 · 保质期记录" },
-      { property: "og:description", content: "保质期记录应用如何收集、使用和删除你的数据。" },
+      { title: "隐私政策 · Minipiry · 超简到期" },
+      { name: "description", content: "Minipiry · 超简到期应用如何收集、使用和删除你的数据。" },
+      { property: "og:title", content: "隐私政策 · Minipiry · 超简到期" },
+      { property: "og:description", content: "Minipiry · 超简到期应用如何收集、使用和删除你的数据。" },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -27,7 +27,7 @@ const SECTIONS: { title: string; body: string[] }[] = [
   {
     title: "二、信息的用途",
     body: [
-      "仅用于为你保存和同步保质期记录、在到期前发送提醒。",
+      "仅用于为你保存和同步Minipiry · 超简到期、在到期前发送提醒。",
       "我们不会出售你的信息，也不会用于广告。",
     ],
   },

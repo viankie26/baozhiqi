@@ -1,3 +1,4 @@
+import { useLang } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,9 +13,9 @@ import { localDateString } from "@/lib/date";
 export const Route = createFileRoute("/_authenticated/add")({
   head: () => ({
     meta: [
-      { title: "添加物品 · 保质期记录" },
+      { title: "添加物品 · Minipiry · 超简到期" },
       { name: "description", content: "语音或手动添加物品保质期。" },
-      { property: "og:title", content: "添加物品 · 保质期记录" },
+      { property: "og:title", content: "添加物品 · Minipiry · 超简到期" },
       { property: "og:description", content: "语音或手动添加物品保质期。" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -36,6 +37,7 @@ const inputClass =
   "w-full border-b-2 border-foreground bg-transparent px-0 py-2.5 text-[1.0625rem] text-foreground outline-none placeholder:text-muted-foreground focus:border-expired";
 
 function AddPage() {
+  const { t, lang } = useLang();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [category, setCategory] = useState<Category>("food");
@@ -66,7 +68,7 @@ function AddPage() {
       });
       const data = (await res.json()) as VoiceResult;
       if (!res.ok || data.error) {
-        toast.error(data.error ?? "语音识别失败");
+        toast.error(data.error ?? t.add.voiceFail);
         return;
       }
       if (data.transcript) setTranscript(data.transcript);
@@ -76,10 +78,10 @@ function AddPage() {
         setCategory(data.category as Category);
       }
       if (data.note) setNote(data.note);
-      toast.success("已识别，请确认后保存");
+      toast.success(t.add.recognized);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "录音失败";
-      if (msg === "empty") toast.error("录音为空，请重试");
+      if (msg === "empty") toast.error(t.add.voiceEmpty);
       else toast.error(msg);
       setRecording(false);
     } finally {
@@ -89,11 +91,11 @@ function AddPage() {
 
   function handleSave() {
     if (!name.trim()) {
-      toast.error("请填写物品名称");
+      toast.error(t.add.needName);
       return;
     }
     if (!expiryDate) {
-      toast.error("请选择过期日期");
+      toast.error(t.add.needDate);
       return;
     }
     addItem({
@@ -102,13 +104,13 @@ function AddPage() {
       expiryDate,
       ...(note.trim() ? { note: note.trim() } : {}),
     });
-    toast.success("已添加");
+    toast.success(t.add.added);
     navigate({ to: "/" });
   }
 
   return (
     <div className="min-h-screen bg-warm-bg pb-32">
-      <PageHeader title="添加物品" kicker="NEW ENTRY" back />
+      <PageHeader title={t.add.title} kicker={t.add.kicker} back />
 
       <main className="mx-auto max-w-md px-5">
         {/* Voice */}
@@ -132,14 +134,14 @@ function AddPage() {
           </span>
           <span className="min-w-0">
             <span className="font-display block text-[1.25rem] leading-none text-foreground">
-              {processing ? "识别中" : recording ? "正在录音" : "语音记录"}
+              {processing ? t.add.processing : recording ? t.add.recording : t.add.voice}
             </span>
             <span className="label-kicker mt-2 block text-muted-foreground">
               {processing
                 ? "PROCESSING"
                 : recording
-                  ? "TAP TO STOP"
-                  : "TAP & SAY «牛奶 九月十五号过期»"}
+                  ? t.add.tapToStop
+                  : t.add.tapSay}
             </span>
           </span>
         </button>
@@ -151,16 +153,16 @@ function AddPage() {
         ) : null}
 
         <div className="flex flex-col gap-6 pt-7">
-          <Field label="物品名称 / NAME">
+          <Field label={t.add.fieldName}>
             <input
               className={inputClass}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="如：牛奶"
+              placeholder={t.add.namePh}
             />
           </Field>
 
-          <Field label="分类 / CATEGORY">
+          <Field label={t.add.fieldCategory}>
             <div className="grid grid-cols-4 border border-border">
               {CATEGORIES.map((c, i) => (
                 <button
@@ -172,12 +174,12 @@ function AddPage() {
                       : "text-muted-foreground"
                   }`}
                 >
-                  {c.label}
+                  {c[lang]}
                 </button>
               ))}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {PRESET_ITEMS[category].map((preset) => {
+              {PRESET_ITEMS[lang][category].map((preset) => {
                 const active = name === preset;
                 return (
                   <button
@@ -197,16 +199,16 @@ function AddPage() {
             </div>
           </Field>
 
-          <Field label="过期日期 / EXPIRY">
+          <Field label={t.add.fieldExpiry}>
             <ExpiryDateInput value={expiryDate} onChange={setExpiryDate} />
           </Field>
 
-          <Field label="备注 / NOTE">
+          <Field label={t.add.fieldNote}>
             <input
               className={inputClass}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="数量、存放位置等"
+              placeholder={t.add.notePh}
             />
           </Field>
         </div>
@@ -218,7 +220,7 @@ function AddPage() {
             onClick={handleSave}
             className="label-kicker w-full bg-foreground py-4 text-background transition active:opacity-80"
           >
-            保存入库 / SAVE
+            {t.add.save}
           </button>
         </div>
       </div>

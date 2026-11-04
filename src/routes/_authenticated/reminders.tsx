@@ -17,9 +17,9 @@ import {
 export const Route = createFileRoute("/_authenticated/reminders")({
   head: () => ({
     meta: [
-      { title: "到期提醒 · 保质期记录" },
+      { title: "到期提醒 · Minipiry · 超简到期" },
       { name: "description", content: "设置到期前几天、几点收到手机通知。" },
-      { property: "og:title", content: "到期提醒 · 保质期记录" },
+      { property: "og:title", content: "到期提醒 · Minipiry · 超简到期" },
       { property: "og:description", content: "设置到期前几天、几点收到手机通知。" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

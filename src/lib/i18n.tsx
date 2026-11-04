@@ -422,11 +422,15 @@ const LangContext = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: D
 });
 
 export function LangProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => detectLang());
+  const [lang, setLangState] = useState<Lang>("zh");
+
+  useEffect(() => { setLangState(detectLang()); }, []);
 
   useEffect(() => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
-    document.title = dict[lang].appName;
+
+    const manifest = document.querySelector('link[rel="manifest"]');
+    if (manifest) manifest.setAttribute("href", lang === "zh" ? "/manifest-zh.webmanifest" : "/manifest.webmanifest");
     const meta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
     if (meta) meta.setAttribute("content", dict[lang].appName);
   }, [lang]);

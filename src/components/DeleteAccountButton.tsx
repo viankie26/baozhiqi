@@ -1,3 +1,4 @@
+import { useLang } from "@/lib/i18n";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,6 +20,7 @@ import { resetItems } from "@/lib/storage";
 import { deleteMyAccount } from "@/lib/account.functions";
 
 export function DeleteAccountButton() {
+  const { t } = useLang();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const del = useServerFn(deleteMyAccount);
@@ -31,10 +33,10 @@ export function DeleteAccountButton() {
       queryClient.clear();
       await supabase.auth.signOut();
       resetItems();
-      toast.success("账号已注销，所有数据已删除");
+      toast.success(t.account.done);
       void navigate({ to: "/auth", replace: true });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "注销失败，请稍后再试");
+      toast.error(e instanceof Error ? e.message : t.account.fail);
       setBusy(false);
     }
   }
@@ -43,18 +45,18 @@ export function DeleteAccountButton() {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <button className="label-kicker w-full border border-destructive py-3 text-destructive">
-          注销账号 / DELETE ACCOUNT
+          {t.account.deleteBtn}
         </button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>确定永久注销账号？</AlertDialogTitle>
+          <AlertDialogTitle>{t.account.confirmTitle}</AlertDialogTitle>
           <AlertDialogDescription>
-            此操作不可恢复，将永久删除该账号下所有物品记录、提醒设置和登录信息。
+            {t.account.confirmBody}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={busy}>取消</AlertDialogCancel>
+          <AlertDialogCancel disabled={busy}>{t.account.cancel}</AlertDialogCancel>
           <AlertDialogAction
             disabled={busy}
             onClick={(e) => {
@@ -63,7 +65,7 @@ export function DeleteAccountButton() {
             }}
             className="bg-destructive text-destructive-foreground"
           >
-            {busy ? "正在注销…" : "永久注销"}
+            {busy ? t.account.deleting : t.account.confirm}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

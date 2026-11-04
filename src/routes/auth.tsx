@@ -1,3 +1,4 @@
+import { useLang } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,15 +9,15 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "登录 · 保质期记录" },
+      { title: "登录 · Minipiry · 超简到期" },
       {
         name: "description",
-        content: "登录后即可把家中物品的保质期记录保存到云端，换手机也不会丢。",
+        content: "登录后即可把家中物品的Minipiry · 超简到期保存到云端，换手机也不会丢。",
       },
-      { property: "og:title", content: "登录 · 保质期记录" },
+      { property: "og:title", content: "登录 · Minipiry · 超简到期" },
       {
         property: "og:description",
-        content: "登录后即可把家中物品的保质期记录保存到云端，换手机也不会丢。",
+        content: "登录后即可把家中物品的Minipiry · 超简到期保存到云端，换手机也不会丢。",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -57,6 +58,7 @@ function writeGuard(value: { count: number; until: number }) {
 }
 
 function AuthPage() {
+  const { t } = useLang();
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
@@ -99,32 +101,32 @@ function AuthPage() {
     if (busy) return;
     if (lockedUntil > Date.now()) {
       const mins = Math.max(1, Math.ceil((lockedUntil - Date.now()) / 60000));
-      toast.error(`操作过于频繁，请 ${mins} 分钟后再试`);
+      toast.error(t.auth.tooFast(mins));
       return;
     }
     if (mode === "signup") {
       // 蜜罐：真人看不到这个输入框，只有自动脚本会填
       if (honeypot.trim() !== "") {
-        toast.error("注册失败，请重试");
+        toast.error(t.auth.botFail);
         return;
       }
       // 填写太快说明是脚本
       if (Date.now() - formOpenedAt < 2500) {
-        toast.error("请慢一点，稍后再试一次");
+        toast.error(t.auth.slowDown);
         return;
       }
       if (Number(challengeInput.trim()) !== challenge.answer) {
-        toast.error("验证题答案不正确");
+        toast.error(t.auth.wrongAnswer);
         setChallenge(newChallenge());
         setChallengeInput("");
         return;
       }
       if (password.length < 6) {
-        toast.error("密码至少 6 位");
+        toast.error(t.auth.pwShort);
         return;
       }
       if (password !== password2) {
-        toast.error("两次输入的密码不一致");
+        toast.error(t.auth.pwMismatch);
         return;
       }
     }
@@ -145,7 +147,7 @@ function AuthPage() {
         if (until) setLockedUntil(until);
         if (!data.session) {
           setSentTo(email);
-          toast.success("确认邮件已发送，请查收后点击链接");
+          toast.success(t.auth.emailSentToast);
           return;
         }
       } else {
@@ -156,7 +158,7 @@ function AuthPage() {
         if (error) throw error;
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "操作失败，请重试");
+      toast.error(err instanceof Error ? err.message : t.auth.fail);
       if (mode === "signup") {
         setChallenge(newChallenge());
         setChallengeInput("");
@@ -170,19 +172,19 @@ function AuthPage() {
   async function handleOAuth(provider: "google" | "apple") {
     if (googleBusy) return;
     setGoogleBusy(provider);
-    const label = provider === "apple" ? "苹果" : "谷歌";
+    const label = provider === "apple" ? t.auth.appleLabel : t.auth.googleLabel;
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        toast.error(`${label}登录失败，请重试`);
+        toast.error(t.auth.oauthFail(label));
         setGoogleBusy(false);
         return;
       }
       // 已登录或即将跳转：保持按钮 loading，交给 onAuthStateChange 直接进入主页
     } catch {
-      toast.error(`${label}登录失败，请重试`);
+      toast.error(t.auth.oauthFail(label));
       setGoogleBusy(false);
     }
   }
@@ -191,42 +193,42 @@ function AuthPage() {
   return (
     <div className="min-h-screen bg-warm-bg">
       <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-16">
-        <p className="label-kicker text-muted-foreground">EXPIRY LEDGER</p>
+        <p className="label-kicker text-muted-foreground">{t.auth.kicker}</p>
         <h1 className="font-display mt-2 text-[2.25rem] leading-none text-foreground">
-          保质期记录
+          {t.auth.title}
         </h1>
         <div className="mt-3 border-t-2 border-foreground" />
         <p className="mt-4 text-sm text-muted-foreground">
           {mode === "signin"
-            ? "登录后你的记录会保存在云端，换设备也能看到。"
-            : "注册一个账号，记录只属于你自己。"}
+            ? t.auth.signinSub
+            : t.auth.signupSub}
         </p>
 
         {sentTo ? (
           <div className="mt-8 border border-border p-4">
-            <p className="label-kicker text-muted-foreground">CHECK YOUR EMAIL</p>
+            <p className="label-kicker text-muted-foreground">{t.auth.emailSentTitle}</p>
             <p className="mt-2 text-sm text-foreground">
-              我们已向 {sentTo} 发送了一封确认邮件，点击其中的链接后即可登录。
+              {t.auth.emailSent(sentTo)}
             </p>
             <button
               onClick={() => setSentTo(null)}
               className="label-kicker mt-4 underline underline-offset-4"
             >
-              返回
+              {t.auth.back}
             </button>
           </div>
         ) : (
           <>
             <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
               <Field
-                label="邮箱 / EMAIL"
+                label={t.auth.email}
                 type="email"
                 value={email}
                 onChange={setEmail}
                 autoComplete="email"
               />
               <Field
-                label="密码 / PASSWORD"
+                label={t.auth.password}
                 type="password"
                 value={password}
                 onChange={setPassword}
@@ -235,14 +237,14 @@ function AuthPage() {
               {mode === "signup" && (
                 <>
                   <Field
-                    label="确认密码 / CONFIRM PASSWORD"
+                    label={t.auth.confirmPassword}
                     type="password"
                     value={password2}
                     onChange={setPassword2}
                     autoComplete="new-password"
                   />
                   <Field
-                    label={`验证：${challenge.a} + ${challenge.b} = ?`}
+                    label={t.auth.challenge(challenge.a, challenge.b)}
                     type="text"
                     value={challengeInput}
                     onChange={setChallengeInput}
@@ -268,10 +270,10 @@ function AuthPage() {
               >
                 <span className="label-kicker">
                   {busy
-                    ? "处理中…"
+                    ? t.auth.busy
                     : mode === "signin"
-                      ? "登录 / SIGN IN"
-                      : "注册 / SIGN UP"}
+                      ? t.auth.signin
+                      : t.auth.signup}
                 </span>
               </button>
             </form>
@@ -282,7 +284,7 @@ function AuthPage() {
               className="mt-3 min-h-12 border-2 border-foreground bg-foreground text-background transition active:opacity-80 disabled:opacity-50"
             >
               <span className="label-kicker">
-                {googleBusy === "apple" ? "正在打开苹果登录…" : "通过 Apple 登录 / APPLE"}
+                {googleBusy === "apple" ? t.auth.appleBusy : t.auth.apple}
               </span>
             </button>
 
@@ -292,7 +294,7 @@ function AuthPage() {
               className="mt-3 min-h-12 border-2 border-foreground text-foreground transition active:bg-muted disabled:opacity-50"
             >
               <span className="label-kicker">
-                {googleBusy === "google" ? "正在打开谷歌登录…" : "用谷歌账号继续 / GOOGLE"}
+                {googleBusy === "google" ? t.auth.googleBusy : t.auth.google}
               </span>
             </button>
 
@@ -303,11 +305,11 @@ function AuthPage() {
               }}
               className="mt-6 text-sm text-muted-foreground underline underline-offset-4"
             >
-              {mode === "signin" ? "还没有账号？去注册" : "已有账号？去登录"}
+              {mode === "signin" ? t.auth.toSignup : t.auth.toSignin}
             </button>
             <p className="mt-6 text-xs text-muted-foreground">
-              登录或注册即表示你已阅读并同意
-              <Link to="/privacy" className="underline underline-offset-4">《隐私政策》</Link>
+              {t.auth.privacyPre} 
+              <Link to="/privacy" className="underline underline-offset-4">{t.auth.privacyLink}</Link>
             </p>
           </>
         )}

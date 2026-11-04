@@ -14,6 +14,7 @@ import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
+import { LangProvider } from "@/lib/i18n";
 import { resetItems } from "@/lib/storage";
 
 function NotFoundComponent() {
@@ -87,8 +88,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "保质期" },
-      { property: "og:title", content: "保质期记录" },
+      { name: "apple-mobile-web-app-title", content: "超简到期" },
+      { property: "og:title", content: "Minipiry · 超简到期" },
       { property: "og:description", content: "简便记录物品保质期，支持语音添加，到期提醒。" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -117,7 +118,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <head>
         <HeadContent />
       </head>
@@ -154,7 +155,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <LangProvider>
+        <Outlet />
+      </LangProvider>
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
   );
