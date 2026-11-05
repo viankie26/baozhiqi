@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { authenticateCronRequest } from "@/integrations/supabase/cron-auth";
 import { reminderWindow } from "@/lib/reminder-schedule";
+import { notificationContent } from "@/lib/notification-content";
 
 export const Route = createFileRoute("/api/public/jobs/send-reminders")({
   server: {
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/api/public/jobs/send-reminders")({
 
         const { data: settings } = await supabaseAdmin
           .from("notification_settings")
-          .select("user_id,enabled,days_before,remind_hour,tz_offset_minutes")
+          .select("user_id,enabled,days_before,remind_hour,tz_offset_minutes,language")
           .eq("enabled", true);
 
         const now = Date.now();
@@ -55,13 +56,11 @@ export const Route = createFileRoute("/api/public/jobs/send-reminders")({
             .eq("user_id", s.user_id);
           if (!subs?.length) continue;
 
-          const names = fresh.slice(0, 3).map((i) => i.name).join("、");
-          const body =
-            fresh.length > 3 ? `${names} 等 ${fresh.length} 件物品快到期了` : `${names} 快到期了，记得尽快使用`;
+          const { title, body } = notificationContent(fresh.map((i) => i.name), s.language === "en" ? "en" : "zh");
 
           for (const sub of subs) {
             const payload = await buildPushPayload(
-              { data: { title: "保质期提醒", body, url: "/", tag: `expiry-${win.today}` }, options: { ttl: 86400 } },
+              { data: { title, body, url: "/", tag: `expiry-${win.today}` }, options: { ttl: 86400 } },
               { endpoint: sub.endpoint, expirationTime: null, keys: { p256dh: sub.p256dh, auth: sub.auth } },
               vapid,
             );

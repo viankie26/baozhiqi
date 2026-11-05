@@ -1,5 +1,23 @@
 import { supabase } from "@/integrations/supabase/client";
 import { VAPID_PUBLIC_KEY, type ReminderSettings } from "./reminder-schedule";
+import { currentLang, type Lang } from "./i18n";
+
+function pushError(key: "login" | "unsupported" | "permission" | "register" | "save") {
+  const messages = {
+    login: ["请先登录", "Please sign in first"],
+    unsupported: ["此浏览器不支持通知", "This browser doesn't support notifications"],
+    permission: ["未允许通知，请在系统设置里打开", "Allow notifications in system settings"],
+    register: ["设备登记失败，请重试", "Couldn't register this device, please try again"],
+    save: ["保存失败，请重试", "Couldn't save, please try again"],
+  };
+  return new Error(messages[key][currentLang() === "zh" ? 0 : 1]);
+}
+
+export async function saveNotificationLanguage(language: Lang) {
+  const uid = await userId();
+  const { error } = await supabase.from("notification_settings").update({ language }).eq("user_id", uid);
+  if (error) throw pushError("save");
+}
 
 export function pushSupported(): boolean {
   return (
@@ -30,7 +48,7 @@ function keyBytes(b64: string): Uint8Array<ArrayBuffer> {
 async function userId(): Promise<string> {
   const { data } = await supabase.auth.getSession();
   const id = data.session?.user.id;
-  if (!id) throw new Error("请先登录");
+  if (!id) throw pushError("login");
   return id;
 }
 
@@ -58,16 +76,17 @@ export async function saveSettings(s: Omit<ReminderSettings, "tzOffsetMinutes">)
     days_before: s.daysBefore,
     remind_hour: s.remindHour,
     tz_offset_minutes: -new Date().getTimezoneOffset(),
+    language: currentLang(),
     updated_at: new Date().toISOString(),
   });
-  if (error) throw new Error("保存失败，请重试");
+  if (error) throw pushError("save");
 }
 
 /** Asks permission, subscribes this device and stores it for the account. */
 export async function enableOnThisDevice() {
-  if (!pushSupported()) throw new Error("此浏览器不支持通知");
+  if (!pushSupported()) throw pushError("unsupported");
   const perm = await Notification.requestPermission();
-  if (perm !== "granted") throw new Error("未允许通知，请在系统设置里打开");
+  if (perm !== "granted") throw pushError("permission");
   const reg = await navigator.serviceWorker.register("/push-sw.js");
   await navigator.serviceWorker.ready;
   const sub =
@@ -87,7 +106,7 @@ export async function enableOnThisDevice() {
     },
     { onConflict: "endpoint" },
   );
-  if (error) throw new Error("设备登记失败，请重试");
+  if (error) throw pushError("register");
 }
 
 export async function deviceSubscribed(): Promise<boolean> {

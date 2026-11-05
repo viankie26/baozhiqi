@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useLang } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -63,6 +64,7 @@ function AddPage() {
         headers: {
           "Content-Type": "audio/wav",
           "x-client-date": localDateString(),
+          "x-client-language": lang,
         },
         body: blob,
       });
@@ -80,7 +82,7 @@ function AddPage() {
       if (data.note) setNote(data.note);
       toast.success(t.add.recognized);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "录音失败";
+      const msg = e instanceof Error ? e.message : t.add.voiceFail;
       if (msg === "empty") toast.error(t.add.voiceEmpty);
       else toast.error(msg);
       setRecording(false);
@@ -114,7 +116,7 @@ function AddPage() {
 
       <main className="mx-auto max-w-md px-5">
         {/* Voice */}
-        <button
+        <Button variant="plain" size="natural"
           onClick={handleVoice}
           disabled={processing}
           className={`flex w-full items-center gap-4 border-b-2 border-foreground py-6 text-left transition disabled:opacity-60 ${
@@ -144,7 +146,7 @@ function AddPage() {
                   : t.add.tapSay}
             </span>
           </span>
-        </button>
+        </Button>
 
         {transcript ? (
           <p className="border-b border-border py-3 text-[0.8125rem] italic text-muted-foreground">
@@ -165,7 +167,7 @@ function AddPage() {
           <Field label={t.add.fieldCategory}>
             <div className="grid grid-cols-4 border border-border">
               {CATEGORIES.map((c, i) => (
-                <button
+                <Button variant="plain" size="natural"
                   key={c.value}
                   onClick={() => setCategory(c.value)}
                   className={`label-kicker py-3.5 transition ${i > 0 ? "border-l border-border" : ""} ${
@@ -175,14 +177,14 @@ function AddPage() {
                   }`}
                 >
                   {c[lang]}
-                </button>
+                </Button>
               ))}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               {PRESET_ITEMS[lang][category].map((preset) => {
                 const active = name === preset;
                 return (
-                  <button
+                  <Button variant="plain" size="natural"
                     key={preset}
                     type="button"
                     onClick={() => setName(active ? "" : preset)}
@@ -193,7 +195,7 @@ function AddPage() {
                     }`}
                   >
                     {preset}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -216,12 +218,12 @@ function AddPage() {
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-foreground bg-warm-bg px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4">
         <div className="mx-auto max-w-md">
-          <button
+          <Button variant="plain" size="natural"
             onClick={handleSave}
             className="label-kicker w-full bg-foreground py-4 text-background transition active:opacity-80"
           >
             {t.add.save}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

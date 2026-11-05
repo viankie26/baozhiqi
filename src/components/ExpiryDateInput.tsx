@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useLang } from "@/lib/i18n";
 import { zhCN, enUS } from "date-fns/locale";
 import { useEffect, useRef, useState } from "react";
@@ -101,13 +102,13 @@ export function ExpiryDateInput({
 
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <button
+            <Button variant="plain" size="natural"
               type="button"
               aria-label={t.dateInput.openCal}
               className="mb-1.5 ml-auto flex h-11 w-11 shrink-0 items-center justify-center border-2 border-foreground text-foreground transition active:bg-muted"
             >
               <CalendarIcon className="h-4 w-4" />
-            </button>
+            </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="end">
             <Calendar
@@ -132,7 +133,7 @@ export function ExpiryDateInput({
           const target = offsetExpiryDate(preset.id);
           const active = value === target;
           return (
-            <button
+            <Button variant="plain" size="natural"
               key={preset.id}
               type="button"
               aria-label={t.dateInput.presetAria(preset[lang])}
@@ -144,7 +145,7 @@ export function ExpiryDateInput({
               }`}
             >
               {preset[lang]}
-            </button>
+            </Button>
           );
         })}
       </div>

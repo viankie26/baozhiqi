@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useLang } from "@/lib/i18n";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -23,7 +24,7 @@ export function SignOutButton() {
   }
 
   return (
-    <button
+    <Button variant="plain" size="natural"
       onClick={handleSignOut}
       disabled={busy}
       aria-label={t.account.signOutAria}
@@ -31,6 +32,6 @@ export function SignOutButton() {
     >
       <LogOut className="h-3.5 w-3.5" strokeWidth={2.4} />
       <span className="label-kicker">{t.account.signOut}</span>
-    </button>
+    </Button>
   );
 }

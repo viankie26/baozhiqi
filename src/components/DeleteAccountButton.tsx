@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useLang } from "@/lib/i18n";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -44,9 +45,9 @@ export function DeleteAccountButton() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <button className="label-kicker w-full border border-destructive py-3 text-destructive">
+        <Button variant="plain" size="natural" className="label-kicker w-full border border-destructive py-3 text-destructive">
           {t.account.deleteBtn}
-        </button>
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

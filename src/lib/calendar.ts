@@ -15,6 +15,11 @@ export function addAllToCalendar(items: Item[]): number {
   input.name = "items";
   input.value = JSON.stringify(entries);
   form.append(input);
+  const language = document.createElement("input");
+  language.type = "hidden";
+  language.name = "lang";
+  language.value = currentLang();
+  form.append(language);
   document.body.append(form);
   form.submit();
   form.remove();
@@ -24,6 +29,8 @@ export function addAllToCalendar(items: Item[]): number {
 export function addToCalendar(item: Item) {
   // Calendar import behavior depends on the browser/system calendar.
   const params = new URLSearchParams({
+    id: item.id,
+    lang: currentLang(),
     name: item.name,
     date: item.expiryDate,
     category: categoryLabel(item.category, currentLang()),

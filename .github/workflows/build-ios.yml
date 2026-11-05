@@ -19,6 +19,7 @@ jobs:
         run: |
           npx cap add ios
           npx cap sync ios
+          python3 ios-shell/localize-ios.py
           /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 用于通过语音快速添加保质期物品" ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string 用于识别语音中的物品名称和日期" ios/App/App/Info.plist || true
 

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useLang } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -44,12 +45,12 @@ function ItemDetailPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-warm-bg px-6 text-center">
         <p className="font-display text-[1.5rem] text-foreground">{t.detail.notFound}</p>
-        <button
+        <Button variant="plain" size="natural"
           onClick={() => navigate({ to: "/" })}
           className="label-kicker bg-foreground px-5 py-3 text-background"
         >
           {t.detail.backHome}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -110,7 +111,7 @@ function ItemDetailPage() {
           </span>
         </div>
 
-        <button
+        <Button variant="plain" size="natural"
           onClick={() => {
             addToCalendar(item);
             toast.success(t.detail.calReady);
@@ -118,7 +119,7 @@ function ItemDetailPage() {
           className="label-kicker mt-4 flex w-full items-center justify-center gap-1.5 border-2 border-foreground py-3 text-foreground transition active:bg-muted"
         >
           <CalendarPlus className="h-3.5 w-3.5" /> {t.detail.syncCal}
-        </button>
+        </Button>
 
         <div className="flex flex-col gap-6 pt-7">
           <Field label={t.detail.fieldName}>
@@ -131,7 +132,7 @@ function ItemDetailPage() {
           <Field label={t.detail.fieldCategory}>
             <div className="grid grid-cols-4 border border-border">
               {CATEGORIES.map((c, i) => (
-                <button
+                <Button variant="plain" size="natural"
                   key={c.value}
                   onClick={() => setCategory(c.value)}
                   className={`label-kicker py-3.5 transition ${i > 0 ? "border-l border-border" : ""} ${
@@ -141,7 +142,7 @@ function ItemDetailPage() {
                   }`}
                 >
                   {c[lang]}
-                </button>
+                </Button>
               ))}
             </div>
           </Field>
@@ -161,25 +162,25 @@ function ItemDetailPage() {
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-foreground bg-warm-bg px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4">
         <div className="mx-auto flex max-w-md gap-2">
-          <button
+          <Button variant="plain" size="natural"
             onClick={handleUsedUp}
             className="label-kicker flex flex-1 items-center justify-center gap-1.5 border-2 border-foreground py-3.5 text-foreground transition active:bg-muted"
           >
             <CheckCircle2 className="h-3.5 w-3.5" /> {t.detail.usedUp}
-          </button>
-          <button
+          </Button>
+          <Button variant="plain" size="natural"
             onClick={handleSave}
             className="label-kicker flex-[1.4] bg-foreground py-3.5 text-background transition active:opacity-80"
           >
             {t.detail.save}
-          </button>
-          <button
+          </Button>
+          <Button variant="plain" size="natural"
             onClick={handleDelete}
             className="flex min-h-11 items-center justify-center border-2 border-foreground px-4 text-foreground transition active:bg-muted"
             aria-label={t.detail.deleteAria}
           >
             <Trash2 className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

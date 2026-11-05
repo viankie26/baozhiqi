@@ -10,8 +10,8 @@ const entrySchema = z.object({
   note: z.string().max(10000).optional(),
 });
 
-function calendarResponse(entries: CalendarEntry[]) {
-  return new Response(buildCalendar(entries), {
+function calendarResponse(entries: CalendarEntry[], lang: "zh" | "en") {
+  return new Response(buildCalendar(entries, new Date(), lang), {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
       "Content-Disposition": 'inline; filename="expiry-reminders.ics"',
@@ -27,13 +27,14 @@ export const Route = createFileRoute("/api/calendar")({
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const parsed = entrySchema.safeParse({
+          id: url.searchParams.get("id") ?? undefined,
           name: url.searchParams.get("name"),
           date: url.searchParams.get("date"),
           category: url.searchParams.get("category") ?? undefined,
           note: url.searchParams.get("note") ?? undefined,
         });
         if (!parsed.success) return new Response("Invalid parameters", { status: 400 });
-        return calendarResponse([parsed.data]);
+        return calendarResponse([parsed.data], url.searchParams.get("lang") === "en" ? "en" : "zh");
       },
       POST: async ({ request }) => {
         // Only formats the caller's supplied data; no account data is read/stored.
@@ -49,7 +50,7 @@ export const Route = createFileRoute("/api/calendar")({
           }
           const parsed = z.array(entrySchema).min(1).max(10000).safeParse(JSON.parse(raw));
           if (!parsed.success) return new Response("Invalid parameters", { status: 400 });
-          return calendarResponse(parsed.data);
+          return calendarResponse(parsed.data, form.get("lang") === "en" ? "en" : "zh");
         } catch {
           return new Response("Invalid parameters", { status: 400 });
         }

@@ -41,4 +41,13 @@ describe("batch expiry reminders", () => {
     expect(validCalendarDate("2028-02-29")).toBe(true);
     expect(() => buildCalendar([{ name: "牛奶", date: "2026-02-30" }])).toThrow();
   });
+  test("changing export language preserves dates, identities and alarm times", () => {
+    const entries = calendarEntries(items, "en");
+    const en = buildCalendar(entries, new Date("2026-11-04T00:00:00Z"), "en");
+    const zh = buildCalendar(entries, new Date("2026-11-04T00:00:00Z"), "zh");
+    const scheduling = (text: string) => text.split("\r\n").filter((line) => /^(UID|DTSTART|DTEND|TRIGGER):|^(DTSTART|DTEND);/.test(line));
+    expect(scheduling(en)).toEqual(scheduling(zh));
+    expect(entries).toHaveLength(2);
+    expect(en.match(/BEGIN:VALARM/g)).toHaveLength(4);
+  });
 });

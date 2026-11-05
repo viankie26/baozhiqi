@@ -212,7 +212,7 @@ function Tab({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <Button variant="plain" size="natural"
       onClick={onClick}
       className={`label-kicker pb-1 transition ${
         active
@@ -221,7 +221,7 @@ function Tab({
       }`}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 

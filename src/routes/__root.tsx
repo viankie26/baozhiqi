@@ -14,24 +14,26 @@ import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
-import { LangProvider } from "@/lib/i18n";
+import { LangProvider, useLang } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
 import { resetItems } from "@/lib/storage";
 
 function NotFoundComponent() {
+  const { lang } = useLang();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">{lang === "zh" ? "页面不存在" : "Page not found"}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          {lang === "zh" ? "此页面不存在或已移走。" : "The page you're looking for doesn't exist or has been moved."}
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            {lang === "zh" ? "返回首页" : "Go home"}
           </Link>
         </div>
       </div>
@@ -40,6 +42,7 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
+  const { lang } = useLang();
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -50,26 +53,26 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          {lang === "zh" ? "页面加载失败" : "This page didn't load"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          {lang === "zh" ? "请重试或返回首页。" : "Something went wrong on our end. You can try refreshing or head back home."}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
+          <Button
             onClick={() => {
               router.invalidate();
               reset();
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
-          </button>
+            {lang === "zh" ? "重试" : "Try again"}
+          </Button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            {lang === "zh" ? "返回首页" : "Go home"}
           </a>
         </div>
       </div>
@@ -123,7 +126,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <LangProvider>{children}</LangProvider>
         <Scripts />
       </body>
     </html>
@@ -155,9 +158,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <LangProvider>
-        <Outlet />
-      </LangProvider>
+      <Outlet />
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
   );

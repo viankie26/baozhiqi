@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export type Lang = "zh" | "en";
@@ -423,8 +424,9 @@ const LangContext = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: D
 
 export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("zh");
+  const [ready, setReady] = useState(false);
 
-  useEffect(() => { setLangState(detectLang()); }, []);
+  useEffect(() => { setLangState(detectLang()); setReady(true); }, []);
 
   useEffect(() => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
@@ -434,6 +436,22 @@ export function LangProvider({ children }: { children: ReactNode }) {
     const meta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
     if (meta) meta.setAttribute("content", dict[lang].appName);
   }, [lang]);
+
+  useEffect(() => {
+    if (!ready) return;
+    const sync = () => {
+      void supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          void import("./push").then(({ saveNotificationLanguage }) => saveNotificationLanguage(lang)).catch(() => {});
+        }
+      });
+    };
+    sync();
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") setTimeout(sync, 0);
+    });
+    return () => data.subscription.unsubscribe();
+  }, [lang, ready]);
 
   function setLang(l: Lang) {
     setLangState(l);

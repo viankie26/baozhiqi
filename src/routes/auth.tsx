@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { useLang } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -193,6 +195,7 @@ function AuthPage() {
   return (
     <div className="min-h-screen bg-warm-bg">
       <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-16">
+        <div className="mb-6"><LanguageSwitch /></div>
         <p className="label-kicker text-muted-foreground">{t.auth.kicker}</p>
         <h1 className="font-display mt-2 text-[2.25rem] leading-none text-foreground">
           {t.auth.title}
@@ -210,12 +213,12 @@ function AuthPage() {
             <p className="mt-2 text-sm text-foreground">
               {t.auth.emailSent(sentTo)}
             </p>
-            <button
+            <Button variant="plain" size="natural"
               onClick={() => setSentTo(null)}
               className="label-kicker mt-4 underline underline-offset-4"
             >
               {t.auth.back}
-            </button>
+            </Button>
           </div>
         ) : (
           <>
@@ -263,7 +266,7 @@ function AuthPage() {
                 </>
               )}
 
-              <button
+              <Button variant="plain" size="natural"
                 type="submit"
                 disabled={busy || !!googleBusy}
                 className="min-h-12 border-2 border-foreground bg-foreground text-background transition active:opacity-80 disabled:opacity-50"
@@ -275,10 +278,10 @@ function AuthPage() {
                       ? t.auth.signin
                       : t.auth.signup}
                 </span>
-              </button>
+              </Button>
             </form>
 
-            <button
+            <Button variant="plain" size="natural"
               onClick={() => handleOAuth("apple")}
               disabled={busy || !!googleBusy}
               className="mt-3 min-h-12 border-2 border-foreground bg-foreground text-background transition active:opacity-80 disabled:opacity-50"
@@ -286,9 +289,9 @@ function AuthPage() {
               <span className="label-kicker">
                 {googleBusy === "apple" ? t.auth.appleBusy : t.auth.apple}
               </span>
-            </button>
+            </Button>
 
-            <button
+            <Button variant="plain" size="natural"
               onClick={() => handleOAuth("google")}
               disabled={busy || !!googleBusy}
               className="mt-3 min-h-12 border-2 border-foreground text-foreground transition active:bg-muted disabled:opacity-50"
@@ -296,9 +299,9 @@ function AuthPage() {
               <span className="label-kicker">
                 {googleBusy === "google" ? t.auth.googleBusy : t.auth.google}
               </span>
-            </button>
+            </Button>
 
-            <button
+            <Button variant="plain" size="natural"
               onClick={() => {
                 setMode(mode === "signin" ? "signup" : "signin");
                 setPassword2("");
@@ -306,9 +309,9 @@ function AuthPage() {
               className="mt-6 text-sm text-muted-foreground underline underline-offset-4"
             >
               {mode === "signin" ? t.auth.toSignup : t.auth.toSignin}
-            </button>
+            </Button>
             <p className="mt-6 text-xs text-muted-foreground">
-              {t.auth.privacyPre} 
+              {t.auth.privacyPre}{" "}
               <Link to="/privacy" className="underline underline-offset-4">{t.auth.privacyLink}</Link>
             </p>
           </>

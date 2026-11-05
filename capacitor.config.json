@@ -1,6 +1,6 @@
 {
   "appId": "com.viankie.baozhiqi",
-  "appName": "保质期记录",
+  "appName": "Minipiry",
   "webDir": "ios-shell",
   "server": {
     "url": "https://baozhiqi.lovable.app",

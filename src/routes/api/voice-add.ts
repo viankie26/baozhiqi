@@ -17,24 +17,25 @@ export const Route = createFileRoute("/api/voice-add")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const en = request.headers.get("x-client-language") === "en";
         const apiKey = process.env["LOVABLE_API_KEY"];
         if (!apiKey) {
-          return Response.json({ error: "AI key not configured" }, { status: 500 });
+          return Response.json({ error: en ? "Voice entry is unavailable. Please try again later." : "语音暂不可用，请稍后再试" }, { status: 500 });
         }
 
         const buf = await request.arrayBuffer();
         if (buf.byteLength < 1024) {
-          return Response.json({ error: "录音为空，请重试" }, { status: 400 });
+          return Response.json({ error: en ? "Recording was empty. Please try again." : "录音为空，请重试" }, { status: 400 });
         }
         if (buf.byteLength > 25 * 1024 * 1024) {
-          return Response.json({ error: "录音过长" }, { status: 413 });
+          return Response.json({ error: en ? "Recording is too long." : "录音过长" }, { status: 413 });
         }
 
         // 1. Speech-to-text
         const fd = new FormData();
         fd.append("model", STT_MODEL);
         fd.append("file", new Blob([buf], { type: "audio/wav" }), "recording.wav");
-        fd.append("language", "zh");
+        // Omit a forced language: recognize both Chinese and English speech.
 
         const trRes = await fetch(`${GATEWAY}/audio/transcriptions`, {
           method: "POST",
@@ -42,16 +43,15 @@ export const Route = createFileRoute("/api/voice-add")({
           body: fd,
         });
         if (!trRes.ok) {
-          const detail = await trRes.text().catch(() => "");
           return Response.json(
-            { error: `转写失败 (${trRes.status})`, detail },
+            { error: en ? "Couldn't recognize speech. Please try again." : "转写失败，请重试" },
             { status: 502 },
           );
         }
         const trJson = (await trRes.json()) as { text?: string };
         const transcript = (trJson.text ?? "").trim();
         if (!transcript) {
-          return Response.json({ error: "没听清，请再说一次" }, { status: 422 });
+          return Response.json({ error: en ? "Couldn't hear you. Please try again." : "没听清，请再说一次" }, { status: 422 });
         }
 
         // Client's device-local date (YYYY-MM-DD) — never use server UTC time.
@@ -83,7 +83,7 @@ async function parseTranscript(
 ): Promise<Parsed | null> {
   const system =
     `你是一个保质期记录助手。今天是 ${today}（请以此推断相对日期）。` +
-    "转写文本可能是繁体或中文数字（如“九月十五號”），请转换为简体与阿拉伯数字。用户用中文口语描述一件物品及其过期时间。请把转写文本解析为结构化 JSON。" +
+    "用户可能用中文或英文描述物品及到期时间。保留物品名和备注的原语言；中文繁体可转简体，中文数字转阿拉伯数字。支持英文相对日期 today/tomorrow/next Friday/in three days。请把转写文本解析为结构化 JSON。" +
     "字段：name(物品名，简洁，不带\"过期\"等修饰)，expiryDate(YYYY-MM-DD，根据\"X月X号/日\"、\"明天/后天/今天\"等推断，跨年则用下一个该月份的年份)，" +
     "category(只能是 food/medicine/daily/other 之一，食品=food 药品=medicine 日化清洁护肤=daily 其他=other)，note(可选备注)。" +
     "只输出 JSON，不要解释，不要 markdown 代码块。";

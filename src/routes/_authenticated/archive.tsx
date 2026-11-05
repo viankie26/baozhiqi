@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useLang } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { useItems, updateItem, deleteItem } from "@/lib/useItems";
@@ -53,7 +54,7 @@ function ArchivePage() {
               <div key={it.id} className="animate-rise hair-b pb-3">
                 <ItemCard item={it} muted />
                 <div className="flex gap-2">
-                  <button
+                  <Button variant="plain" size="natural"
                     className="label-kicker flex flex-1 items-center justify-center gap-1.5 border-2 border-foreground bg-foreground py-3 text-background transition active:opacity-80"
                     onClick={() => {
                       updateItem(it.id, { usedUp: false });
@@ -61,8 +62,8 @@ function ArchivePage() {
                     }}
                   >
                     <RotateCcw className="h-3.5 w-3.5" /> {t.archive.undo}
-                  </button>
-                  <button
+                  </Button>
+                  <Button variant="plain" size="natural"
                     className="label-kicker flex items-center justify-center gap-1.5 border-2 border-foreground px-4 py-3 text-foreground transition active:bg-muted"
                     onClick={() => {
                       deleteItem(it.id);
@@ -70,7 +71,7 @@ function ArchivePage() {
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5" /> {t.archive.del}
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}
