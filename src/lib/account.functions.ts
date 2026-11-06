@@ -13,6 +13,7 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
     if (ids.length) await supabaseAdmin.from("notification_log").delete().in("item_id", ids);
     await supabaseAdmin.from("items").delete().eq("user_id", userId);
     await supabaseAdmin.from("push_subscriptions").delete().eq("user_id", userId);
+    await supabaseAdmin.from("native_push_tokens").delete().eq("user_id", userId);
     await supabaseAdmin.from("notification_settings").delete().eq("user_id", userId);
 
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);

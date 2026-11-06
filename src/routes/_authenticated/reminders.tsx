@@ -16,6 +16,8 @@ import {
   pushSupported,
   saveSettings,
 } from "@/lib/push";
+import { isNativeApp, enableNativePush, nativePushGranted, haptic } from "@/lib/native";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/reminders")({
   head: () => ({
@@ -51,6 +53,10 @@ function RemindersPage() {
         }
       })
       .catch(() => {});
+    if (isNativeApp()) {
+      nativePushGranted().then((on) => setDevice(on ? "on" : "off"));
+      return;
+    }
     if (!pushSupported()) {
       setDevice(/iPhone|iPad/.test(navigator.userAgent) && !isStandalone() ? "needs-home" : "unsupported");
       return;
@@ -61,10 +67,18 @@ function RemindersPage() {
   async function handleEnableDevice() {
     setBusy(true);
     try {
-      await enableOnThisDevice();
+      if (isNativeApp()) {
+        const { data } = await supabase.auth.getSession();
+        const uid = data.session?.user.id;
+        if (!uid) throw new Error(t.reminders.enableFail);
+        if ((await enableNativePush(uid)) !== "granted") throw new Error(t.reminders.enableFail);
+      } else {
+        await enableOnThisDevice();
+      }
       await saveSettings({ enabled: true, daysBefore, remindHour: hour });
       setEnabled(true);
       setDevice("on");
+      void haptic("success");
       toast.success(t.reminders.enabledToast);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : t.reminders.enableFail);

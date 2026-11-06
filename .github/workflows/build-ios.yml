@@ -13,7 +13,7 @@ jobs:
           node-version: 22
 
       - name: Install Capacitor
-        run: npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/ios@7
+        run: npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/ios@7 @capacitor/push-notifications@7 @capacitor/haptics@7
 
       - name: Create iOS project
         run: |
@@ -22,6 +22,7 @@ jobs:
           python3 ios-shell/localize-ios.py
           /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 用于通过语音快速添加保质期物品" ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" ios/App/App/Info.plist || true
+          python3 ios-shell/enable-push.py
           cp ios-shell/AppIcon-1024.png ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
           /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string 用于识别语音中的物品名称和日期" ios/App/App/Info.plist || true
 

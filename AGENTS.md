@@ -15,3 +15,4 @@
 - Bilingual UI uses the root language provider, initialized after hydration; persist notification language separately without overwriting reminder choices. Calendar requests explicitly carry language to the shared pure serializer.
 - Native display names and permission strings are generated as localized iOS resources during cloud packaging so the shell remains one codebase.
 - iOS app is a Capacitor shell (capacitor.config.json, ios-shell/) loading the published site via server.url, built and uploaded by .github/workflows/build-ios.yml; keeps one codebase because the app is SSR and has no static export.
+- Inside the iOS shell, reminders use native APNs (device tokens in native_push_tokens, sent directly from the reminder job via WebCrypto JWT) instead of web push, because WKWebView can't receive web push; web/PWA keeps web push.

@@ -17,6 +17,18 @@ export const Route = createFileRoute("/api/public/jobs/send-reminders")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const vapid = { subject: "mailto:reminders@baozhiqi.app", publicKey: VAPID_PUBLIC_KEY, privateKey };
 
+        const { apnsJwt, sendApns } = await import("@/lib/apns");
+        const apnsKey = process.env["APNS_KEY_P8"];
+        const apnsKeyId = process.env["APNS_KEY_ID"];
+        const apnsTeam = process.env["APNS_TEAM_ID"];
+        const apns = apnsKey && apnsKeyId && apnsTeam
+          ? {
+              jwt: await apnsJwt(apnsTeam, apnsKeyId, apnsKey),
+              topic: "com.viankie.baozhiqi",
+              production: process.env["APNS_SANDBOX"] !== "true",
+            }
+          : null;
+
         const { data: settings } = await supabaseAdmin
           .from("notification_settings")
           .select("user_id,enabled,days_before,remind_hour,tz_offset_minutes,language")
@@ -54,11 +66,23 @@ export const Route = createFileRoute("/api/public/jobs/send-reminders")({
             .from("push_subscriptions")
             .select("id,endpoint,p256dh,auth")
             .eq("user_id", s.user_id);
-          if (!subs?.length) continue;
+          const { data: natives } = await supabaseAdmin
+            .from("native_push_tokens")
+            .select("id,token")
+            .eq("user_id", s.user_id);
+          if (!subs?.length && !natives?.length) continue;
 
           const { title, body } = notificationContent(fresh.map((i) => i.name), s.language === "en" ? "en" : "zh");
 
-          for (const sub of subs) {
+          if (natives?.length && apns) {
+            for (const n of natives) {
+              const status = await sendApns({ ...apns, token: n.token, title, body, threadId: `expiry-${win.today}` });
+              if (status === 400 || status === 410) await supabaseAdmin.from("native_push_tokens").delete().eq("id", n.id);
+              else if (status === 200) sent++;
+            }
+          }
+
+          for (const sub of subs ?? []) {
             const payload = await buildPushPayload(
               { data: { title, body, url: "/", tag: `expiry-${win.today}` }, options: { ttl: 86400 } },
               { endpoint: sub.endpoint, expirationTime: null, keys: { p256dh: sub.p256dh, auth: sub.auth } },

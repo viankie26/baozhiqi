@@ -15,6 +15,13 @@
       "when": 1793775521843,
       "tag": "0001_notification_language",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793993364289,
+      "tag": "0002_migration",
+      "breakpoints": true
     }
   ]
 }
