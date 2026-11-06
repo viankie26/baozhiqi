@@ -3,7 +3,7 @@
   "appName": "Minipiry",
   "webDir": "ios-shell",
   "server": {
-    "url": "https://baozhiqi.lovable.app",
+    "url": "https://minipiry.lovable.app",
     "cleartext": false
   },
   "ios": {
