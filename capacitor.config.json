@@ -4,7 +4,8 @@
   "webDir": "ios-shell",
   "server": {
     "url": "https://minipiry.lovable.app",
-    "cleartext": false
+    "cleartext": false,
+    "errorPath": "index.html"
   },
   "ios": {
     "contentInset": "always"

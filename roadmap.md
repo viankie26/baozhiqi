@@ -1,5 +1,5 @@
-# Bilingual release
-- [x] Complete zh/en pages, date entry and navigation.
-- [x] Persist notification language and localize calendar exports.
-- [x] Localize web/iOS naming and privacy policy.
-- [x] Verify language switching and signed-in item flow; run tests.
+# App Store readiness
+- [x] Home search, category filter, sample data, offline notice, pull-to-refresh.
+- [x] iOS shell offline/retry page.
+- [ ] App Store metadata (zh/en) — delivered in chat.
+- [ ] Apple developer account, certificates, APNs key — waiting on user.

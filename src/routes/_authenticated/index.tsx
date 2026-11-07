@@ -1,8 +1,11 @@
 import { useLang } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bell } from "lucide-react";
-import { useState } from "react";
-import { useItems, deleteItem } from "@/lib/useItems";
+import { useEffect, useRef, useState } from "react";
+import { useItems, deleteItem, addItem, loadItems } from "@/lib/useItems";
+import { CATEGORIES, type Category } from "@/lib/types";
+import { Input } from "@/components/ui/input";
+import { Search, WifiOff, RefreshCw } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
@@ -41,8 +44,22 @@ function Index() {
   const items = useItems();
   const [filter, setFilter] = useState<Filter>("all");
   const [editing, setEditing] = useState(false);
+  const { lang } = useLang();
+  const [query, setQuery] = useState("");
+  const [cat, setCat] = useState<Category | "all">("all");
+  const online = useOnline();
+  const pull = usePullToRefresh(async () => {
+    await loadItems(true);
+    toast.success(t.home.refreshed);
+  });
 
-  const active = items.filter((it) => !it.usedUp);
+  const allActive = items.filter((it) => !it.usedUp);
+  const q = query.trim().toLowerCase();
+  const active = allActive.filter(
+    (it) =>
+      (cat === "all" || it.category === cat) &&
+      (!q || it.name.toLowerCase().includes(q) || (it.note ?? "").toLowerCase().includes(q)),
+  );
   const expired = active.filter((it) => urgencyOf(it) === "expired");
   const soon = active.filter((it) => urgencyOf(it) === "soon");
   const normal = active.filter((it) => urgencyOf(it) === "normal");
@@ -77,6 +94,21 @@ function Index() {
       />
 
       <main className="mx-auto max-w-md px-5">
+        {pull > 0 && (
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground" style={{ height: pull }}>
+            <RefreshCw className="h-3.5 w-3.5" style={{ transform: `rotate(${pull * 4}deg)` }} />
+            {pull >= 60 ? t.home.pullRefresh : ""}
+          </div>
+        )}
+        {!online && (
+          <div className="mt-3 flex items-center gap-2 border-2 border-expired/40 px-3 py-2 text-sm text-expired">
+            <WifiOff className="h-4 w-4 shrink-0" />
+            <span className="flex-1">{t.home.offline}</span>
+            <Button variant="outline" size="sm" className="rounded-none" onClick={() => window.location.reload()}>
+              {t.home.retry}
+            </Button>
+          </div>
+        )}
         {/* Numbers strip */}
         <section className="animate-rise grid grid-cols-3 border-b-2 border-foreground">
           <Stat label={t.home.statStock} value={active.length} tone="text-foreground" />
@@ -104,7 +136,7 @@ function Index() {
           <Button
             variant="outline"
             className="w-full rounded-none"
-            disabled={active.length === 0}
+            disabled={allActive.length === 0}
             onClick={() => {
               try {
                 addAllToCalendar(items);
@@ -118,6 +150,36 @@ function Index() {
           </Button>
         </div>
 
+        {allActive.length > 0 && (
+          <div className="space-y-3 border-b border-border py-3">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t.home.search}
+                aria-label={t.home.search}
+                className="rounded-none pl-9"
+              />
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {([{ value: "all" as const, label: t.home.catAll, emoji: "" }, ...CATEGORIES.map((c) => ({ value: c.value, label: lang === "en" ? c.en : c.zh, emoji: c.emoji }))]).map((c) => (
+                <Button
+                  key={c.value}
+                  variant={cat === c.value ? "default" : "outline"}
+                  size="sm"
+                  className="shrink-0 rounded-full"
+                  aria-pressed={cat === c.value}
+                  onClick={() => setCat(c.value)}
+                >
+                  {c.emoji} {c.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Filter tabs */}
         <div className="flex items-center gap-5 border-b border-border py-3">
           <Tab active={filter === "all"} onClick={() => setFilter("all")}>
@@ -129,7 +191,7 @@ function Index() {
           <Tab active={filter === "expired"} onClick={() => setFilter("expired")}>
             {t.home.tabExpired} {expired.length}
           </Tab>
-          {active.length > 0 && (
+          {allActive.length > 0 && (
             <Button
               variant="ghost"
               size="sm"
@@ -143,8 +205,10 @@ function Index() {
           )}
         </div>
 
-        {active.length === 0 ? (
+        {allActive.length === 0 ? (
           <EmptyState />
+        ) : active.length === 0 ? (
+          <NoMatch text={t.home.noResult} />
         ) : (
           <div className="flex flex-col">
             {showExpired && expired.length > 0 && (
@@ -275,6 +339,7 @@ function NoMatch({ text }: { text: string }) {
 
 function EmptyState() {
   const { t } = useLang();
+  const [busy, setBusy] = useState(false);
   return (
     <div className="py-20">
       <p className="font-display text-[2rem] leading-tight text-foreground">
@@ -283,6 +348,78 @@ function EmptyState() {
       <p className="mt-3 max-w-[18rem] text-sm text-muted-foreground">
         {t.home.emptyBody}
       </p>
+      <Button
+        variant="outline"
+        className="mt-6 rounded-none"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          const offsets = [-1, 2, 20, 90, 5, 365];
+          const cats: Category[] = ["food", "food", "medicine", "daily", "food", "other"];
+          await Promise.all(
+            t.home.sampleNames.map((name, i) => {
+              const d = new Date();
+              d.setDate(d.getDate() + (offsets[i] ?? 30));
+              const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+              return addItem({ name, category: cats[i] ?? "other", expiryDate: iso });
+            }),
+          );
+          setBusy(false);
+          toast.success(t.home.sampleDone);
+        }}
+      >
+        {t.home.sampleBtn}
+      </Button>
     </div>
   );
+}
+
+function useOnline() {
+  const [online, setOnline] = useState(true);
+  useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
+  return online;
+}
+
+/** Touch pull-down at page top; returns current pull distance in px. */
+function usePullToRefresh(onRefresh: () => Promise<void>) {
+  const [pull, setPull] = useState(0);
+  const start = useRef<number | null>(null);
+  const dist = useRef(0);
+  const cb = useRef(onRefresh);
+  cb.current = onRefresh;
+  useEffect(() => {
+    const down = (e: TouchEvent) => {
+      start.current = window.scrollY <= 0 ? (e.touches[0]?.clientY ?? 0) : null;
+    };
+    const move = (e: TouchEvent) => {
+      if (start.current === null) return;
+      const d = Math.max(0, Math.min(90, ((e.touches[0]?.clientY ?? start.current) - start.current) * 0.5));
+      dist.current = d;
+      setPull(d);
+    };
+    const up = () => {
+      if (dist.current >= 60) void cb.current();
+      start.current = null;
+      dist.current = 0;
+      setPull(0);
+    };
+    window.addEventListener("touchstart", down, { passive: true });
+    window.addEventListener("touchmove", move, { passive: true });
+    window.addEventListener("touchend", up);
+    return () => {
+      window.removeEventListener("touchstart", down);
+      window.removeEventListener("touchmove", move);
+      window.removeEventListener("touchend", up);
+    };
+  }, []);
+  return pull;
 }

@@ -16,3 +16,4 @@
 - Native display names and permission strings are generated as localized iOS resources during cloud packaging so the shell remains one codebase.
 - iOS app is a Capacitor shell (capacitor.config.json, ios-shell/) loading the published site via server.url, built and uploaded by .github/workflows/build-ios.yml; keeps one codebase because the app is SSR and has no static export.
 - Inside the iOS shell, reminders use native APNs (device tokens in native_push_tokens, sent directly from the reminder job via WebCrypto JWT) instead of web push, because WKWebView can't receive web push; web/PWA keeps web push.
+- iOS shell sets capacitor server.errorPath to the bundled ios-shell/index.html, a self-contained bilingual offline/retry page, so failed remote loads never show a blank screen.
