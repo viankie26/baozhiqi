@@ -1,5 +1,5 @@
 import { categoryLabel, type Item } from "./types";
-import type { Lang } from "./i18n";
+import type { Lang } from "./i18n-dict";
 
 export type CalendarEntry = { id?: string | undefined; name: string; date: string; category?: string | undefined; note?: string | undefined };
 

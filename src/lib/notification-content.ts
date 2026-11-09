@@ -1,4 +1,4 @@
-import type { Lang } from "./i18n";
+import type { Lang } from "./i18n-dict";
 
 export function notificationContent(names: string[], language: Lang) {
   const listed = names.slice(0, 3).join(language === "zh" ? "、" : ", ");
