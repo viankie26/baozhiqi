@@ -10,7 +10,16 @@ export function daysUntil(expiryDate: string, now: Date = new Date()): number {
 }
 
 export function urgencyOf(item: Item, now: Date = new Date()): Urgency {
-  const d = daysUntil(item.expiryDate, now);
+  return expiryStatus(item.expiryDate, now).urgency;
+}
+
+/** One local-clock snapshot shared by countdown and urgency, reusable on any client. */
+export function expiryStatus(expiryDate: string, now: Date = new Date()): { days: number; urgency: Urgency } {
+  const days = daysUntil(expiryDate, now);
+  return { days, urgency: urgencyFromDays(days) };
+}
+
+function urgencyFromDays(d: number): Urgency {
   if (d < 0) return "expired";
   if (d <= 7) return "soon";
   return "normal";

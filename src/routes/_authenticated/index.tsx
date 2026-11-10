@@ -9,7 +9,7 @@ import { Search, WifiOff, RefreshCw } from "lucide-react";
 import { ItemCard } from "@/components/ItemCard";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
-import { urgencyOf } from "@/lib/date";
+import { selectHomeItems, type ItemFilter } from "@/lib/item-selectors";
 import type { Item } from "@/lib/types";
 import { CalendarPlus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -37,12 +37,10 @@ export const Route = createFileRoute("/_authenticated/")({
   component: Index,
 });
 
-type Filter = "all" | "soon" | "expired";
-
 function Index() {
   const { t } = useLang();
   const items = useItems();
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useState<ItemFilter>("all");
   const [editing, setEditing] = useState(false);
   const { lang } = useLang();
   const [query, setQuery] = useState("");
@@ -53,21 +51,8 @@ function Index() {
     toast.success(t.home.refreshed);
   });
 
-  const allActive = items.filter((it) => !it.usedUp);
-  const q = query.trim().toLowerCase();
-  const active = allActive.filter(
-    (it) =>
-      (cat === "all" || it.category === cat) &&
-      (!q || it.name.toLowerCase().includes(q) || (it.note ?? "").toLowerCase().includes(q)),
-  );
-  const expired = active.filter((it) => urgencyOf(it) === "expired");
-  const soon = active.filter((it) => urgencyOf(it) === "soon");
-  const normal = active.filter((it) => urgencyOf(it) === "normal");
-  const alertCount = expired.length + soon.length;
-
-  const showExpired = filter === "all" || filter === "expired";
-  const showSoon = filter === "all" || filter === "soon";
-  const showNormal = filter === "all";
+  const { allActive, active, expired, soon, normal, alertCount, showExpired, showSoon, showNormal } =
+    selectHomeItems(items, { query, category: cat, filter });
 
   const today = new Date();
   const dateline = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, "0")}.${String(

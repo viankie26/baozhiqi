@@ -18,3 +18,4 @@
 - Inside the iOS shell, reminders use native APNs (device tokens in native_push_tokens, sent directly from the reminder job via WebCrypto JWT) instead of web push, because WKWebView can't receive web push; web/PWA keeps web push.
 - iOS shell sets capacitor server.errorPath to the bundled ios-shell/index.html, a self-contained bilingual offline/retry page, so failed remote loads never show a blank screen.
 - Translation strings live in the pure src/lib/i18n-dict.ts (no browser/React APIs); i18n.tsx only adds the React provider and storage, so the dictionary can be copied unchanged to other clients.
+- Keep home/archive selection in pure item-selectors.ts and countdown/urgency in date.ts; preserve input order and accept an explicit local-clock Date so other clients can reuse and test the same behavior.

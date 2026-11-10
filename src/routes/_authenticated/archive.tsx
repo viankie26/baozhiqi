@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
+import { selectArchivedItems } from "@/lib/item-selectors";
 
 export const Route = createFileRoute("/_authenticated/archive")({
   head: () => ({
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/archive")({
 function ArchivePage() {
   const { t } = useLang();
   const items = useItems();
-  const archived = items.filter((it) => it.usedUp);
+  const archived = selectArchivedItems(items);
 
   return (
     <div className="min-h-screen bg-warm-bg pb-32">

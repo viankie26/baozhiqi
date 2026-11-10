@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { categoryLabel, type Item } from "@/lib/types";
-import { daysUntil, formatDate, urgencyOf, type Urgency } from "@/lib/date";
+import { expiryStatus, formatDate, type Urgency } from "@/lib/date";
 import { useLang } from "@/lib/i18n";
 
 const tone: Record<Urgency, string> = {
@@ -23,8 +23,7 @@ const statusLabel: Record<Urgency, string> = {
 
 export function ItemCard({ item, muted }: { item: Item; muted?: boolean }) {
   const { lang, t } = useLang();
-  const urgency = urgencyOf(item);
-  const days = daysUntil(item.expiryDate);
+  const { urgency, days } = expiryStatus(item.expiryDate);
 
   return (
     <Link

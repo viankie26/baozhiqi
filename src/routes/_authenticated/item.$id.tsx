@@ -9,7 +9,7 @@ import { CATEGORIES, type Category } from "@/lib/types";
 import { deleteItem, updateItem, useItemById } from "@/lib/useItems";
 import { PageHeader } from "@/components/PageHeader";
 import { ExpiryDateInput } from "@/components/ExpiryDateInput";
-import { daysUntil, formatDate, urgencyOf } from "@/lib/date";
+import { expiryStatus, formatDate } from "@/lib/date";
 
 export const Route = createFileRoute("/_authenticated/item/$id")({
   head: () => ({
@@ -55,8 +55,7 @@ function ItemDetailPage() {
     );
   }
 
-  const days = daysUntil(item.expiryDate);
-  const urgency = urgencyOf(item);
+  const { days, urgency } = expiryStatus(item.expiryDate);
   const dayTone =
     urgency === "expired"
       ? "text-expired"
